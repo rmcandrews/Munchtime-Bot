@@ -181,7 +181,7 @@ slackEvents.on('message', (event) => {
             user: event.user
         }).then(response => {
             let user = response.user;
-            web.chat.postMessage({ channel: event.channel, text: `@${user.name} HAVE SOME TACOS!!! :taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco:` }).catch(console.error);
+            web.chat.postMessage({ channel: event.channel, text: `@${user.profile.display_name} HAVE SOME TACOS!!! :taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco:` }).catch(console.error);
         }).catch(console.error);
     }
 });
