@@ -174,6 +174,16 @@ slackEvents.on('message', (event) => {
         ];
         web.chat.postMessage({ channel: event.channel, text: gifLinks[Math.floor(Math.random() * gifLinks.length)] }).catch(console.error);
     }
+    
+    //Handle if someone has tacos. Will later expand this to actually track tacos.
+    if(event.text && event.text.includes(":taco:")) {
+        web.users.info({
+            user: event.user
+        }).then(response => {
+            let user = response.user;
+            web.chat.postMessage({ channel: event.channel, text: `@${user.profile.display_name} HAVE SOME TACOS!!! :taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco:` }).catch(console.error);
+        }).catch(console.error);
+    }
 });
 
 slackEvents.on('member_joined_channel', (event) => {
