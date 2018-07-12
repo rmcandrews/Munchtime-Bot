@@ -108,12 +108,12 @@ handleMention = (event) => {
         case "leaderboard":
             // Sums up offenses from every day per userId
             let totalUserOffenses = {};
-            for(var offenses in dailyOffenses) {
-                for(var userId in offenses) {
+            for(var date in dailyOffenses) {
+                for(var userId in dailyOffenses[date]) {
                     if(!totalUserOffenses.has(userId)) {
                         totalUserOffenses[userId] = 0;
                     }
-                    totalUserOffenses[userId] += offenses[userId];
+                    totalUserOffenses[userId] += dailyOffenses[date][userId]
                 }
             }
             // TODO Users that never commit an offense do not display
