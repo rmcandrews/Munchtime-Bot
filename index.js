@@ -116,86 +116,90 @@ doesMentionBot = (text) => {
 
 slackEvents.on('message', (event) => {
 
-    // Handle kicking people who say a banned phrase
-    if(event.text && didUseBannedWords(event.text)) {
-        web.groups.kick({
-            channel: event.channel,
-            user: event.user
-        }).then(() => {
-            web.users.info({
+    if (event.channel != process.env.IGNORE_CHANNEL) {
+        // Handle kicking people who say a banned phrase
+        if(event.text && didUseBannedWords(event.text)) {
+            web.groups.kick({
+                channel: event.channel,
                 user: event.user
-            }).then(response => {
-                let user = response.user;
-                let offenseNumber = getOffenseNumber(event.user);
-                let offenseTime = getOffenseTime(offenseNumber);
-                if(doesMentionBot(event.text)) {
-                    web.chat.postMessage({ channel: event.channel, text: `${user.real_name} insulted my mother and is therefore kicked for 24 hours.` })
-                    .then(() => {
-                        inviteUserAfterTime(event.channel, event.user, 86400);
-                    })
-                    .catch(console.error);
-                } else {
-                    web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for saying: ${event.text}. This is their ${ordinal_of(offenseNumber)} offense of the day. They will be reinvited after ${offenseTime.words}.` })
-                    .then(() => {
-                        inviteUserAfterTime(event.channel, event.user, offenseTime.seconds);
-                    })
-                    .catch(console.error);
-                }
+            }).then(() => {
+                web.users.info({
+                    user: event.user
+                }).then(response => {
+                    let user = response.user;
+                    let offenseNumber = getOffenseNumber(event.user);
+                    let offenseTime = getOffenseTime(offenseNumber);
+                    if(doesMentionBot(event.text)) {
+                        web.chat.postMessage({ channel: event.channel, text: `${user.real_name} insulted my mother and is therefore kicked for 24 hours.` })
+                        .then(() => {
+                            inviteUserAfterTime(event.channel, event.user, 86400);
+                        })
+                        .catch(console.error);
+                    } else {
+                        web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for saying: ${event.text}. This is their ${ordinal_of(offenseNumber)} offense of the day. They will be reinvited after ${offenseTime.words}.` })
+                        .then(() => {
+                            inviteUserAfterTime(event.channel, event.user, offenseTime.seconds);
+                        })
+                        .catch(console.error);
+                    }
+                }).catch(console.error);
             }).catch(console.error);
-        }).catch(console.error);
-    } else if(event.text && doesMentionBot(event.text)) {
-        handleMention(event);
-    }
+        } else if(event.text && doesMentionBot(event.text)) {
+            handleMention(event);
+        }
 
-    // Handle storing the user who kicked the bot
-    if(event.channel === "DBN4H8DQT") { // if a direct message from slackbot
-        web.im.history({channel: "DBN4H8DQT"}).then(response => {
-            response.messages.some(message => {
-                if(message.text.includes("You have been removed")) {
-                    userWhoKickedMe = message.text.match(/<(.*?)>/)[1].slice(1);
-                    return true;
-                }
-            })
-        });
-    }
+        // Handle storing the user who kicked the bot
+        if(event.channel === "DBN4H8DQT") { // if a direct message from slackbot
+            web.im.history({channel: "DBN4H8DQT"}).then(response => {
+                response.messages.some(message => {
+                    if(message.text.includes("You have been removed")) {
+                        userWhoKickedMe = message.text.match(/<(.*?)>/)[1].slice(1);
+                        return true;
+                    }
+                })
+            });
+        }
 
-    // Handle telling poeple to drink if they say holy ship
-    if(event.text && event.text.toLowerCase().includes("holy ship")) {
-        web.chat.postMessage({ channel: event.channel, text: "drink" }).catch(console.error);
-    }
+        // Handle telling poeple to drink if they say holy ship
+        if(event.text && event.text.toLowerCase().includes("holy ship")) {
+            web.chat.postMessage({ channel: event.channel, text: "drink" }).catch(console.error);
+        }
 
-    // Handle if someone says apparently
-    if(event.text && event.text.toLowerCase().includes("apparently")) {
-        let gifLinks = [ 
-            "https://media.giphy.com/media/KnXfc2AMnl6Wk/giphy.gif",
-            "https://media1.tenor.com/images/127808ecc3bd3f1f8a1ca6e93de32b11/tenor.gif?itemid=10867888",
-            "https://gph.is/2KPrZCU",
-            "https://78.media.tumblr.com/3257915b44a86327721c3491633287ea/tumblr_nad1emme0t1ry46hlo1_r1_500.gif"
-        ];
-        web.chat.postMessage({ channel: event.channel, text: gifLinks[Math.floor(Math.random() * gifLinks.length)] }).catch(console.error);
+        // Handle if someone says apparently
+        if(event.text && event.text.toLowerCase().includes("apparently")) {
+            let gifLinks = [ 
+                "https://media.giphy.com/media/KnXfc2AMnl6Wk/giphy.gif",
+                "https://media1.tenor.com/images/127808ecc3bd3f1f8a1ca6e93de32b11/tenor.gif?itemid=10867888",
+                "https://gph.is/2KPrZCU",
+                "https://78.media.tumblr.com/3257915b44a86327721c3491633287ea/tumblr_nad1emme0t1ry46hlo1_r1_500.gif"
+            ];
+            web.chat.postMessage({ channel: event.channel, text: gifLinks[Math.floor(Math.random() * gifLinks.length)] }).catch(console.error);
+        }
     }
 });
 
 slackEvents.on('member_joined_channel', (event) => {
-    if(userWhoKickedMe) {
-        web.groups.kick({
-            channel: event.channel,
-            user: userWhoKickedMe
-        }).then(() => {
-            web.users.info({
+    if (event.channel != process.env.IGNORE_CHANNEL) {
+        if(userWhoKickedMe) {
+            web.groups.kick({
+                channel: event.channel,
                 user: userWhoKickedMe
-            }).then(response => {
-                let user = response.user;
-                let offenseNumber = getOffenseNumber(userWhoKickedMe);
-                let offenseTime = getOffenseTime(offenseNumber);
-                web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for kicking me. This is their ${ordinal_of(offenseNumber)} offense of the day. They will be reinvited after ${offenseTime.words}.` })
-                .then(() => {
-                    inviteUserAfterTime(event.channel, userWhoKickedMe, offenseTime.seconds);
-                    userWhoKickedMe = undefined;
-                })
-                .catch(console.error);
+            }).then(() => {
+                web.users.info({
+                    user: userWhoKickedMe
+                }).then(response => {
+                    let user = response.user;
+                    let offenseNumber = getOffenseNumber(userWhoKickedMe);
+                    let offenseTime = getOffenseTime(offenseNumber);
+                    web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for kicking me. This is their ${ordinal_of(offenseNumber)} offense of the day. They will be reinvited after ${offenseTime.words}.` })
+                    .then(() => {
+                        inviteUserAfterTime(event.channel, userWhoKickedMe, offenseTime.seconds);
+                        userWhoKickedMe = undefined;
+                    })
+                    .catch(console.error);
+                }).catch(console.error);
             }).catch(console.error);
-        }).catch(console.error);
+        }
     }
 });
 
