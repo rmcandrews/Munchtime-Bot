@@ -172,7 +172,9 @@ slackEvents.on('message', (event) => {
                 "https://gph.is/2KPrZCU",
                 "https://78.media.tumblr.com/3257915b44a86327721c3491633287ea/tumblr_nad1emme0t1ry46hlo1_r1_500.gif"
             ];
-            web.chat.postMessage({ channel: event.channel, text: gifLinks[Math.floor(Math.random() * gifLinks.length)] }).catch(console.error);
+            if(Math.random() > 0.75) {
+                web.chat.postMessage({ channel: event.channel, text: gifLinks[Math.floor(Math.random() * gifLinks.length)] }).catch(console.error);
+            }
         }
     }
     
