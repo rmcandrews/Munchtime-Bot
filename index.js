@@ -21,6 +21,7 @@ const bannedSubstrings = ["ur mom", "u r mom", "your mom" , "your mother"];
 
 let userWhoKickedMe;
 let dailyOffenses = {};
+let userIdDisplayMap = {};
 
 getDateString = () => {
     return moment().tz(process.env.TZ || 'America/Chicago').format('YYYYMMDD');
@@ -41,8 +42,11 @@ ordinal_of = (i) => {
     return i + "th";
 }
 
-getOffenseNumber = (userId) => {
+// Consider renaming--it gets but also increments.
+getOffenseNumber = (user) => {
+    const userId = user.id;
     let dateString = getDateString();
+    if(!userIdDisplayMap[userId]) userIdDisplayMap[userId] = user.name;
     if(!dailyOffenses[dateString]) dailyOffenses[dateString] = {};
     if(!dailyOffenses[dateString][userId]) {
         dailyOffenses[dateString][userId] = 1;
@@ -122,7 +126,7 @@ handleMention = (event) => {
             let i = 1;
             for(var userId in totalUserOffenses) {
                 // Won't look uniform for i > 9
-                leaderboardText += `${i} - ${userId}\n`;
+                leaderboardText += `${i} - ${userIdDisplayMap[userId]}\n`;
                 i++;
             }
             postMessage(leaderboardText);
@@ -148,7 +152,7 @@ slackEvents.on('message', (event) => {
                 user: event.user
             }).then(response => {
                 let user = response.user;
-                let offenseNumber = getOffenseNumber(event.user);
+                let offenseNumber = getOffenseNumber(user);
                 let offenseTime = getOffenseTime(offenseNumber);
                 if(doesMentionBot(event.text)) {
                     web.chat.postMessage({ channel: event.channel, text: `${user.real_name} insulted my mother and is therefore kicked for 24 hours.` })
@@ -218,7 +222,7 @@ slackEvents.on('member_joined_channel', (event) => {
                 user: userWhoKickedMe
             }).then(response => {
                 let user = response.user;
-                let offenseNumber = getOffenseNumber(userWhoKickedMe);
+                let offenseNumber = getOffenseNumber(user);
                 let offenseTime = getOffenseTime(offenseNumber);
                 web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for kicking me. This is their ${ordinal_of(offenseNumber)} offense of the day. They will be reinvited after ${offenseTime.words}.` })
                 .then(() => {
