@@ -99,7 +99,7 @@ handleMention = (event) => {
     let command = event.text.split(">").pop().trim();
     switch(command) {
         case "status":
-            postMessage("I'm doing p good");
+            postMessage("I'm doing  - staging bot");
             break;
         case "fortune":
             let fortunes = require('fortune-cookie')
