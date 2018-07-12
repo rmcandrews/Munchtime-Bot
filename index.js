@@ -177,7 +177,12 @@ slackEvents.on('message', (event) => {
     
     //Handle if someone has tacos. Will later expand this to actually track tacos.
     if(event.text && event.text.includes(":taco:")) {
-        web.chat.postMessage({ channel: event.channel, text: `${event.user} HAVE SOME TACOS!!! :taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco:` }).catch(console.error);
+        web.users.info({
+            user: event.user
+        }).then(response => {
+            let user = response.user;
+            web.chat.postMessage({ channel: event.channel, text: `@${user.name} HAVE SOME TACOS!!! :taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco:` }).catch(console.error);
+        }).catch(console.error);
     }
 });
 
