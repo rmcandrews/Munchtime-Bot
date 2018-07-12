@@ -92,7 +92,7 @@ inviteUserAfterTime = (channel, user, seconds) => {
 }
 
 handleMention = (event) => {
-    console.log(`mentions with ${event.text}`);
+    console.log(`mentions with ${event.channel}`);
     let postMessage = (text) => {
         web.chat.postMessage({ channel: event.channel, text: text}).catch(console.error)
     }
