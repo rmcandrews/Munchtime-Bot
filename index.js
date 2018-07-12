@@ -92,21 +92,20 @@ inviteUserAfterTime = (channel, user, seconds) => {
 }
 
 handleMention = (event) => {
-    console.log(`mentions with ${event.channel}`);
     let postMessage = (text) => {
         web.chat.postMessage({ channel: event.channel, text: text}).catch(console.error)
     }
     let command = event.text.split(">").pop().trim();
     switch(command) {
         case "status":
-            postMessage("I'm doing  - staging bot");
+            postMessage("I'm doing p good");
             break;
         case "fortune":
             let fortunes = require('fortune-cookie')
             web.chat.postMessage(fortunes[Math.floor(Math.random() * fortunes.length)]);
             break;
         default:
-            postMessage("idk what you are saying");
+            postMessage("what that means?");
     }
 };
 
