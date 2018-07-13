@@ -95,7 +95,7 @@ slackEvents.on('message', (event) => {
                     let user = response.user;
                     offenseService.getOffensesForUserInLast24Hours()
                     .then(userOffenses => {
-                        const offenseNumber = userOffenses.length;
+                        const offenseNumber = userOffenses.length + 1;
                         let offenseTime = getOffenseTime(userOffenses.length);
                         if(doesMentionBot(event.text)) {
                             web.chat.postMessage({ channel: event.channel, text: `${user.real_name} insulted my mother and is therefore kicked for 24 hours.` })
@@ -192,3 +192,8 @@ slackEvents.on('error', console.error);
 http.createServer(app).listen(port, () => {
     console.log(`server listening on port ${port}`);
 });
+
+offenseService.getOffensesForUserInLast24Hours().then(userOffenses => {
+    console.log("DEBUG");
+    console.log(userOffenses);
+})
