@@ -1,8 +1,9 @@
 const http = require('http');
-const moment = require('moment');
-const tz = require('moment-timezone');
 const express = require('express');
 const bodyParser = require('body-parser');
+const helpers = require('./helpers');
+const offenseService = require('./services/offenseService');
+
 const app = express();
 app.use(bodyParser.json());
 
@@ -20,41 +21,6 @@ const port = process.env.PORT || 3000;
 const bannedSubstrings = ["ur mom", "u r mom", "your mom" , "your mother"];
 
 let userWhoKickedMe;
-let dailyOffenses = {};
-let userIdDisplayMap = {};
-
-getDateString = () => {
-    return moment().tz(process.env.TZ || 'America/Chicago').format('YYYYMMDD');
-}
-
-ordinal_of = (i) => {
-    var j = i % 10,
-        k = i % 100;
-    if (j == 1 && k != 11) {
-        return i + "st";
-    }
-    if (j == 2 && k != 12) {
-        return i + "nd";
-    }
-    if (j == 3 && k != 13) {
-        return i + "rd";
-    }
-    return i + "th";
-}
-
-// Consider renaming--it gets but also increments.
-getOffenseNumber = (user) => {
-    const userId = user.id;
-    let dateString = getDateString();
-    if(!userIdDisplayMap[userId]) userIdDisplayMap[userId] = user.name;
-    if(!dailyOffenses[dateString]) dailyOffenses[dateString] = {};
-    if(!dailyOffenses[dateString][userId]) {
-        dailyOffenses[dateString][userId] = 1;
-    } else {
-        dailyOffenses[dateString][userId]++;
-    }
-    return dailyOffenses[dateString][userId];
-}
 
 getOffenseTime = (offenseNumber) => {
     if(offenseNumber === 1) {
@@ -85,9 +51,7 @@ didUseBannedWords = (text) => {
 }
 
 inviteUserAfterTime = (channel, user, seconds) => {
-    console.log(`Reiviting user ${user} in ${seconds} seconds`);
     setTimeout(() => {
-        console.log(`Reiviting user`);
         web.groups.invite({
             channel: channel,
             user: user
@@ -96,7 +60,6 @@ inviteUserAfterTime = (channel, user, seconds) => {
 }
 
 handleMention = (event) => {
-    console.log(`mentions with ${event.text}`);
     let postMessage = (text) => {
         web.chat.postMessage({ channel: event.channel, text: text}).catch(console.error)
     }
@@ -132,7 +95,7 @@ handleMention = (event) => {
             postMessage(leaderboardText);
             break;
         default:
-            postMessage("idk what you are saying");
+            postMessage("what that means?");
     }
 };
 
@@ -142,96 +105,109 @@ doesMentionBot = (text) => {
 
 slackEvents.on('message', (event) => {
 
-    // Handle kicking people who say a banned phrase
-    if(event.text && didUseBannedWords(event.text)) {
-        web.groups.kick({
-            channel: event.channel,
-            user: event.user
-        }).then(() => {
+    if (event.channel != process.env.IGNORE_CHANNEL) {
+        // Handle kicking people who say a banned phrase
+        if(event.text && didUseBannedWords(event.text)) {
+            web.groups.kick({
+                channel: event.channel,
+                user: event.user
+            }).then(() => {
+                web.users.info({
+                    user: event.user
+                }).then(response => {
+                    let user = response.user;
+                    offenseService.getOffensesForUserInLast24Hours(event.user)
+                    .then(userOffenses => {
+                        const offenseNumber = userOffenses.length + 1;
+                        let offenseTime = getOffenseTime(offenseNumber);
+                        if(doesMentionBot(event.text)) {
+                            web.chat.postMessage({ channel: event.channel, text: `${user.real_name} insulted my mother and is therefore kicked for 24 hours.` })
+                            .then(() => {
+                                inviteUserAfterTime(event.channel, event.user, 86400);
+                            })
+                            .catch(console.error);
+                        } else {
+                            web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for using a banned phrase. This is their ${helpers.ordinalOf(offenseNumber)} offense in the last 24 hours. They will be reinvited after ${offenseTime.words}.` })
+                            .then(() => {
+                                inviteUserAfterTime(event.channel, event.user, offenseTime.seconds);
+                                offenseService.createOffense(event.user, offenseTime.seconds);
+                            })
+                            .catch(console.error);
+                        }
+                    }).catch(console.error);
+                }).catch(console.error);
+            }).catch(console.error);
+        } else if(event.text && doesMentionBot(event.text)) {
+            handleMention(event);
+        }
+
+        // Handle storing the user who kicked the bot
+        if(event.channel === "DBN4H8DQT") { // if a direct message from slackbot
+            web.im.history({channel: "DBN4H8DQT"}).then(response => {
+                response.messages.some(message => {
+                    if(message.text.includes("You have been removed")) {
+                        userWhoKickedMe = message.text.match(/<(.*?)>/)[1].slice(1);
+                        return true;
+                    }
+                })
+            });
+        }
+
+        // Handle telling poeple to drink if they say holy ship
+        if(event.text && event.text.toLowerCase().includes("holy ship")) {
+            web.chat.postMessage({ channel: event.channel, text: "drink" }).catch(console.error);
+        }
+
+        // Handle if someone says apparently
+        if(event.text && event.text.toLowerCase().includes("apparently")) {
+            let gifLinks = [ 
+                "https://media.giphy.com/media/KnXfc2AMnl6Wk/giphy.gif",
+                "https://media1.tenor.com/images/127808ecc3bd3f1f8a1ca6e93de32b11/tenor.gif?itemid=10867888",
+                "https://gph.is/2KPrZCU",
+                "https://78.media.tumblr.com/3257915b44a86327721c3491633287ea/tumblr_nad1emme0t1ry46hlo1_r1_500.gif"
+            ];
+            if(Math.random() > 0.75) {
+                web.chat.postMessage({ channel: event.channel, text: gifLinks[Math.floor(Math.random() * gifLinks.length)] }).catch(console.error);
+            }
+        }
+
+        //Handle if someone has tacos. Will later expand this to actually track tacos.
+        if(event.text && event.text.includes(":taco:")) {
             web.users.info({
                 user: event.user
             }).then(response => {
                 let user = response.user;
-                let offenseNumber = getOffenseNumber(user);
-                let offenseTime = getOffenseTime(offenseNumber);
-                if(doesMentionBot(event.text)) {
-                    web.chat.postMessage({ channel: event.channel, text: `${user.real_name} insulted my mother and is therefore kicked for 24 hours.` })
-                    .then(() => {
-                        inviteUserAfterTime(event.channel, event.user, 86400);
-                    })
-                    .catch(console.error);
-                } else {
-                    web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for saying: ${event.text}. This is their ${ordinal_of(offenseNumber)} offense of the day. They will be reinvited after ${offenseTime.words}.` })
-                    .then(() => {
-                        inviteUserAfterTime(event.channel, event.user, offenseTime.seconds);
-                    })
-                    .catch(console.error);
-                }
+                web.chat.postMessage({ channel: event.channel, text: `@${user.profile.display_name} HAVE SOME TACOS!!! :taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco:` }).catch(console.error);
             }).catch(console.error);
-        }).catch(console.error);
-    } else if(event.text && doesMentionBot(event.text)) {
-        handleMention(event);
-    }
-
-    // Handle storing the user who kicked the bot
-    if(event.channel === "DBN4H8DQT") { // if a direct message from slackbot
-        web.im.history({channel: "DBN4H8DQT"}).then(response => {
-            response.messages.some(message => {
-                if(message.text.includes("You have been removed")) {
-                    userWhoKickedMe = message.text.match(/<(.*?)>/)[1].slice(1);
-                    return true;
-                }
-            })
-        });
-    }
-
-    // Handle telling poeple to drink if they say holy ship
-    if(event.text && event.text.toLowerCase().includes("holy ship")) {
-        web.chat.postMessage({ channel: event.channel, text: "drink" }).catch(console.error);
-    }
-
-    // Handle if someone says apparently
-    if(event.text && event.text.toLowerCase().includes("apparently")) {
-        let gifLinks = [ 
-            "https://media.giphy.com/media/KnXfc2AMnl6Wk/giphy.gif",
-            "https://media1.tenor.com/images/127808ecc3bd3f1f8a1ca6e93de32b11/tenor.gif?itemid=10867888",
-            "https://gph.is/2KPrZCU",
-            "https://78.media.tumblr.com/3257915b44a86327721c3491633287ea/tumblr_nad1emme0t1ry46hlo1_r1_500.gif"
-        ];
-        web.chat.postMessage({ channel: event.channel, text: gifLinks[Math.floor(Math.random() * gifLinks.length)] }).catch(console.error);
-    }
-    
-    //Handle if someone has tacos. Will later expand this to actually track tacos.
-    if(event.text && event.text.includes(":taco:")) {
-        web.users.info({
-            user: event.user
-        }).then(response => {
-            let user = response.user;
-            web.chat.postMessage({ channel: event.channel, text: `@${user.profile.display_name} HAVE SOME TACOS!!! :taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco:` }).catch(console.error);
-        }).catch(console.error);
+        }
     }
 });
 
 slackEvents.on('member_joined_channel', (event) => {
-    if(userWhoKickedMe) {
-        web.groups.kick({
-            channel: event.channel,
-            user: userWhoKickedMe
-        }).then(() => {
-            web.users.info({
+    if (event.channel != process.env.IGNORE_CHANNEL) {
+        if(userWhoKickedMe) {
+            web.groups.kick({
+                channel: event.channel,
                 user: userWhoKickedMe
-            }).then(response => {
-                let user = response.user;
-                let offenseNumber = getOffenseNumber(user);
-                let offenseTime = getOffenseTime(offenseNumber);
-                web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for kicking me. This is their ${ordinal_of(offenseNumber)} offense of the day. They will be reinvited after ${offenseTime.words}.` })
-                .then(() => {
-                    inviteUserAfterTime(event.channel, userWhoKickedMe, offenseTime.seconds);
-                    userWhoKickedMe = undefined;
-                })
-                .catch(console.error);
+            }).then(() => {
+                web.users.info({
+                    user: userWhoKickedMe
+                }).then(response => {
+                    let user = response.user;
+                    offenseService.getOffensesForUserInLast24Hours(userWhoKickedMe)
+                    .then(userOffenses => {
+                        const offenseNumber = userOffenses.length + 1;
+                        let offenseTime = getOffenseTime(offenseNumber);
+                        web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for kicking me. This is their ${helpers.ordinalOf(offenseNumber)} offense in the last 24 hours. They will be reinvited after ${offenseTime.words}.` })
+                        .then(() => {
+                            inviteUserAfterTime(event.channel, userWhoKickedMe, offenseTime.seconds);
+                            offenseService.createOffense(userWhoKickedMe, offenseTime.seconds);
+                            userWhoKickedMe = undefined;
+                        }).catch(console.error);
+                    }).catch(console.error);
+                }).catch(console.error);
             }).catch(console.error);
-        }).catch(console.error);
+        }
     }
 });
 
