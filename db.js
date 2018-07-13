@@ -5,4 +5,4 @@ db.connect(process.env.MONGOLAB_URI, (error) => {
     else console.log('mongo connected');
 });
 
-export default db;
+module.exports = db;

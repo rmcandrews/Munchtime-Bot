@@ -10,4 +10,4 @@ const Schema = new db.Schema({
 
 const Offense = db.model('Offense', Schema);
 
-export default Offense;
+module.exports = Offense;
