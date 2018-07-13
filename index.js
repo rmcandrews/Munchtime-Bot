@@ -217,8 +217,8 @@ http.createServer(app).listen(port, () => {
 
 let offense = new Offense();
 offense.id = offense._id;
-offense.offending_user_id = "TESTUSERID";
-offense.resulting_ban_seconds = 60;
+offense.offendingUserId = "TESTUSERID";
+offense.resultingBanSeconds = 60;
 offense.save((err) => {
     if(err) { console.error(err)}
 });

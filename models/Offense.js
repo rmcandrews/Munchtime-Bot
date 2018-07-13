@@ -2,10 +2,10 @@ const db = require("../db");
 
 const Schema = new db.Schema({
     id                      : String, 
-    offending_user_id       : String,
-    resulting_ban_seconds   : Number
+    offendingUserId       : String,
+    resultingBanSeconds   : Number
 },{
-    timestamps: { createdAt: 'created_at' } 
+    timestamps: {}
 });
 
 const Offense = db.model('Offense', Schema);

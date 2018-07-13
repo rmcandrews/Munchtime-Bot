@@ -1,8 +1,9 @@
 let db = require('mongoose');
 
-db.connect(process.env.MONGODB_URI, (error) => {
-    if (error) console.error(error);
-    else console.log('mongo connected');
+const options = { useNewUrlParser: true };
+db.connect(process.env.MONGODB_URI, options, (err) => {
+    if (err) console.error(err);
+    else console.log('db connected');
 });
 
 module.exports = db;
