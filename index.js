@@ -104,7 +104,7 @@ slackEvents.on('message', (event) => {
                             })
                             .catch(console.error);
                         } else {
-                            web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for saying: ${event.text}. This is their ${helpers.ordinalOf(offenseNumber)} offense of the day. They will be reinvited after ${offenseTime.words}.` })
+                            web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for using a banned phrase. This is their ${helpers.ordinalOf(offenseNumber)} offense in the last 24 hours. They will be reinvited after ${offenseTime.words}.` })
                             .then(() => {
                                 inviteUserAfterTime(event.channel, event.user, offenseTime.seconds);
                                 offenseService.createOffense(event.user, offenseTime.seconds);
@@ -160,31 +160,33 @@ slackEvents.on('message', (event) => {
     }
 });
 
-// slackEvents.on('member_joined_channel', (event) => {
-//     if (event.channel != process.env.IGNORE_CHANNEL) {
-//         if(userWhoKickedMe) {
-//             web.groups.kick({
-//                 channel: event.channel,
-//                 user: userWhoKickedMe
-//             }).then(() => {
-//                 web.users.info({
-//                     user: userWhoKickedMe
-//                 }).then(response => {
-//                     let user = response.user;
-//                     let offenseNumber = getOffenseNumber(userWhoKickedMe);
-//                     let offenseTime = getOffenseTime(offenseNumber);
-//                     web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for kicking me. This is their ${helpers.ordinalOf(offenseNumber)} offense of the day. They will be reinvited after ${offenseTime.words}.` })
-//                     .then(() => {
-//                         inviteUserAfterTime(event.channel, userWhoKickedMe, offenseTime.seconds);
-//                         offenseService.createOffense(userWhoKickedMe, offenseTime.seconds);
-//                         userWhoKickedMe = undefined;
-//                     })
-//                     .catch(console.error);
-//                 }).catch(console.error);
-//             }).catch(console.error);
-//         }
-//     }
-// });
+slackEvents.on('member_joined_channel', (event) => {
+    if (event.channel != process.env.IGNORE_CHANNEL) {
+        if(userWhoKickedMe) {
+            web.groups.kick({
+                channel: event.channel,
+                user: userWhoKickedMe
+            }).then(() => {
+                web.users.info({
+                    user: userWhoKickedMe
+                }).then(response => {
+                    let user = response.user;
+                    offenseService.getOffensesForUserInLast24Hours(userWhoKickedMe)
+                    .then(userOffenses => {
+                        const offenseNumber = userOffenses.length + 1;
+                        let offenseTime = getOffenseTime(offenseNumber);
+                        web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for kicking me. This is their ${helpers.ordinalOf(offenseNumber)} offense in the last 24 hours. They will be reinvited after ${offenseTime.words}.` })
+                        .then(() => {
+                            inviteUserAfterTime(event.channel, userWhoKickedMe, offenseTime.seconds);
+                            offenseService.createOffense(userWhoKickedMe, offenseTime.seconds);
+                            userWhoKickedMe = undefined;
+                        }).catch(console.error);
+                    }).catch(console.error);
+                }).catch(console.error);
+            }).catch(console.error);
+        }
+    }
+});
 
 // Handle errors (see `errorCodes` export)
 slackEvents.on('error', console.error);
