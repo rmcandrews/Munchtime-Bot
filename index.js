@@ -1,9 +1,9 @@
 const http = require('http');
-const moment = require('moment');
-const tz = require('moment-timezone');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const helpers = require('./helpers');
+const offenseService = require('./services/offenseService');
 app.use(bodyParser.json());
 
 const createSlackEventAdapter = require('@slack/events-api').createSlackEventAdapter;
@@ -20,37 +20,6 @@ const port = process.env.PORT || 3000;
 const bannedSubstrings = ["ur mom", "u r mom", "your mom" , "your mother"];
 
 let userWhoKickedMe;
-let dailyOffenses = {};
-
-getDateString = () => {
-    return moment().tz(process.env.TZ || 'America/Chicago').format('YYYYMMDD');
-}
-
-ordinal_of = (i) => {
-    var j = i % 10,
-        k = i % 100;
-    if (j == 1 && k != 11) {
-        return i + "st";
-    }
-    if (j == 2 && k != 12) {
-        return i + "nd";
-    }
-    if (j == 3 && k != 13) {
-        return i + "rd";
-    }
-    return i + "th";
-}
-
-getOffenseNumber = (userId) => {
-    let dateString = getDateString();
-    if(!dailyOffenses[dateString]) dailyOffenses[dateString] = {};
-    if(!dailyOffenses[dateString][userId]) {
-        dailyOffenses[dateString][userId] = 1;
-    } else {
-        dailyOffenses[dateString][userId]++;
-    }
-    return dailyOffenses[dateString][userId];
-}
 
 getOffenseTime = (offenseNumber) => {
     if(offenseNumber === 1) {
@@ -81,9 +50,7 @@ didUseBannedWords = (text) => {
 }
 
 inviteUserAfterTime = (channel, user, seconds) => {
-    console.log(`Reiviting user ${user} in ${seconds} seconds`);
     setTimeout(() => {
-        console.log(`Reiviting user`);
         web.groups.invite({
             channel: channel,
             user: user
@@ -126,21 +93,25 @@ slackEvents.on('message', (event) => {
                     user: event.user
                 }).then(response => {
                     let user = response.user;
-                    let offenseNumber = getOffenseNumber(event.user);
-                    let offenseTime = getOffenseTime(offenseNumber);
-                    if(doesMentionBot(event.text)) {
-                        web.chat.postMessage({ channel: event.channel, text: `${user.real_name} insulted my mother and is therefore kicked for 24 hours.` })
-                        .then(() => {
-                            inviteUserAfterTime(event.channel, event.user, 86400);
-                        })
-                        .catch(console.error);
-                    } else {
-                        web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for saying: ${event.text}. This is their ${ordinal_of(offenseNumber)} offense of the day. They will be reinvited after ${offenseTime.words}.` })
-                        .then(() => {
-                            inviteUserAfterTime(event.channel, event.user, offenseTime.seconds);
-                        })
-                        .catch(console.error);
-                    }
+                    offenseService.getOffensesForUserInLast24Hours(event.user)
+                    .then(userOffenses => {
+                        const offenseNumber = userOffenses.length + 1;
+                        let offenseTime = getOffenseTime(offenseNumber);
+                        if(doesMentionBot(event.text)) {
+                            web.chat.postMessage({ channel: event.channel, text: `${user.real_name} insulted my mother and is therefore kicked for 24 hours.` })
+                            .then(() => {
+                                inviteUserAfterTime(event.channel, event.user, 86400);
+                            })
+                            .catch(console.error);
+                        } else {
+                            web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for using a banned phrase. This is their ${helpers.ordinalOf(offenseNumber)} offense in the last 24 hours. They will be reinvited after ${offenseTime.words}.` })
+                            .then(() => {
+                                inviteUserAfterTime(event.channel, event.user, offenseTime.seconds);
+                                offenseService.createOffense(event.user, offenseTime.seconds);
+                            })
+                            .catch(console.error);
+                        }
+                    }).catch(console.error);
                 }).catch(console.error);
             }).catch(console.error);
         } else if(event.text && doesMentionBot(event.text)) {
@@ -200,14 +171,17 @@ slackEvents.on('member_joined_channel', (event) => {
                     user: userWhoKickedMe
                 }).then(response => {
                     let user = response.user;
-                    let offenseNumber = getOffenseNumber(userWhoKickedMe);
-                    let offenseTime = getOffenseTime(offenseNumber);
-                    web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for kicking me. This is their ${ordinal_of(offenseNumber)} offense of the day. They will be reinvited after ${offenseTime.words}.` })
-                    .then(() => {
-                        inviteUserAfterTime(event.channel, userWhoKickedMe, offenseTime.seconds);
-                        userWhoKickedMe = undefined;
-                    })
-                    .catch(console.error);
+                    offenseService.getOffensesForUserInLast24Hours(userWhoKickedMe)
+                    .then(userOffenses => {
+                        const offenseNumber = userOffenses.length + 1;
+                        let offenseTime = getOffenseTime(offenseNumber);
+                        web.chat.postMessage({ channel: event.channel, text: `${user.real_name} was kicked for kicking me. This is their ${helpers.ordinalOf(offenseNumber)} offense in the last 24 hours. They will be reinvited after ${offenseTime.words}.` })
+                        .then(() => {
+                            inviteUserAfterTime(event.channel, userWhoKickedMe, offenseTime.seconds);
+                            offenseService.createOffense(userWhoKickedMe, offenseTime.seconds);
+                            userWhoKickedMe = undefined;
+                        }).catch(console.error);
+                    }).catch(console.error);
                 }).catch(console.error);
             }).catch(console.error);
         }
