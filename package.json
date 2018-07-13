@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "start:local": "nodemon index.js"
+    "deploy": "CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD` && git push heroku-staging ${CURRENT_BRANCH}:master --force"
   },
   "author": "",
   "license": "ISC",
@@ -19,7 +19,5 @@
     "moment-timezone": "^0.5.21",
     "mongoose": "^5.2.3"
   },
-  "devDependencies": {
-    "nodemon": "^1.18.0"
-  }
+  "devDependencies": {}
 }

@@ -1,9 +1,10 @@
 const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
-const app = express();
 const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
+
+const app = express();
 app.use(bodyParser.json());
 
 const createSlackEventAdapter = require('@slack/events-api').createSlackEventAdapter;
