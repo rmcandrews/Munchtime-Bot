@@ -193,7 +193,7 @@ http.createServer(app).listen(port, () => {
     console.log(`server listening on port ${port}`);
 });
 
-offenseService.getOffensesForUserInLast24Hours().then(userOffenses => {
+offenseService.getOffensesForUserInLast24Hours("UAM6ZPG78").then(userOffenses => {
     console.log("DEBUG");
     console.log(userOffenses);
 })

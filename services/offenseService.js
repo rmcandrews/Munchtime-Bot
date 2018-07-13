@@ -13,7 +13,7 @@ const createOffense = (offendingUserId, resultingBanSeconds) => {
 const getOffensesForUserInLast24Hours = (userId) => {
     return Offense.find({
         offendingUserId: userId,
-        // createdAt: { $gt: new Date(Date.now() - 24*60*60 * 1000) }
+        createdAt: { $gt: new Date(Date.now() - 24*60*60 * 1000) }
     });
 };
 
