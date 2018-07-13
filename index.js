@@ -93,7 +93,7 @@ slackEvents.on('message', (event) => {
                     user: event.user
                 }).then(response => {
                     let user = response.user;
-                    offenseService.getOffensesForUserInLast24Hours()
+                    offenseService.getOffensesForUserInLast24Hours(event.user)
                     .then(userOffenses => {
                         const offenseNumber = userOffenses.length + 1;
                         let offenseTime = getOffenseTime(userOffenses.length);
@@ -192,8 +192,3 @@ slackEvents.on('error', console.error);
 http.createServer(app).listen(port, () => {
     console.log(`server listening on port ${port}`);
 });
-
-offenseService.getOffensesForUserInLast24Hours("UAM6ZPG78").then(userOffenses => {
-    console.log("DEBUG");
-    console.log(userOffenses);
-})
