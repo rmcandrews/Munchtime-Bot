@@ -96,7 +96,7 @@ slackEvents.on('message', (event) => {
                     offenseService.getOffensesForUserInLast24Hours(event.user)
                     .then(userOffenses => {
                         const offenseNumber = userOffenses.length + 1;
-                        let offenseTime = getOffenseTime(userOffenses.length);
+                        let offenseTime = getOffenseTime(offenseNumber);
                         if(doesMentionBot(event.text)) {
                             web.chat.postMessage({ channel: event.channel, text: `${user.real_name} insulted my mother and is therefore kicked for 24 hours.` })
                             .then(() => {
