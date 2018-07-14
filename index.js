@@ -123,7 +123,7 @@ getScorebaordData = () => {
 
             let displayNameMap = {};
             users.members.forEach(member => {
-                displayNameMap[member.id] = member.profile.display_name;
+                displayNameMap[member.id] = member.profile.display_name || member.profile.real_name;
             });
 
             console.log(displayNameMap);
