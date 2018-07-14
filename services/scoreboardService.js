@@ -16,28 +16,24 @@ const updateScoreboard = (userId, secondsBanned) => {
         console.log("Inital users");
         console.log(users);
         if(!users[userId]) {
-            users[userId] = {
-                totalBans: 0,
-                totalBanSecconds: 0
-            }
+            addNewUser(userId);
         }
-        users[userId].totalBans++;
-        users[userId].totalBanSecconds += secondsBanned;
-        console.log("Updated users");
-        console.log(users);
-        Scoreboard.update({ _id: scoreboard.id }, 
-            { 
-                $set: { 
-                    "users": users 
-                }
-            }, 
-            (err, updatedScoreboard) => {
-                console.log("DB stuff");
-                if (err) console.error(err);
-                console.log(updatedScoreboard);
-            }
-        );
     });
+}
+
+const addNewUser = (userId) => {
+    let newUserObject = {};
+    newUserObject[`users.${userId}`] = {};
+    Scoreboard.update({ _id: scoreboard.id }, 
+        { 
+            $set: newUserObject
+        }, 
+        (err, updatedScoreboard) => {
+            console.log("DB stuff");
+            if (err) console.error(err);
+            console.log(updatedScoreboard);
+        }
+    );
 }
 
 module.exports = {
