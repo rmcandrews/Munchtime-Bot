@@ -10,7 +10,8 @@ const getScoreboard = () => {
 };
 
 const updateScoreboard = (userId, secondsBanned) => {
-    getScoreboard().then(scoreboard => {
+    getScoreboard().then(scoreboardSchema => {
+        let scoreboard = scoreboardSchema.toObject();
         let users = scoreboard.users;
         console.log("Inital users");
         console.log(users);
