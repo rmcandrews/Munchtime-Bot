@@ -94,7 +94,7 @@ handleLeaderBoard = (event) => {
         });
         let tableData = [];
         allUserScores.forEach(userScores => {
-            tableData.push([displayNameMap[userScores.userId], userScores.bans, helpers.secondsToString(userScores.bannedSeconds)]);
+            tableData.push([displayNameMap[userScores.userId].trim(), userScores.bans, helpers.secondsToString(userScores.bannedSeconds).trim()]);
         });
         let tableConfig = { columns: {
                 0: {
