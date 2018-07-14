@@ -126,8 +126,6 @@ getScorebaordData = () => {
                 displayNameMap[member.id] = member.profile.display_name || member.profile.real_name;
             });
 
-            console.log(displayNameMap);
-
             let scoreboardData = []
             allUserScores.forEach(userScores => {
                 scoreboardData.push({
@@ -135,6 +133,10 @@ getScorebaordData = () => {
                     bans: userScores.bans,
                     bannedTime: helpers.secondsToString(userScores.bannedSeconds).trim()
                 })
+            })
+
+            scoreboardData.sort((a, b) => {
+              return a.bans > b.bans;
             })
             resolve(scoreboardData);
         })
