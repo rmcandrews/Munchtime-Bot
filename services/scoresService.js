@@ -3,7 +3,7 @@ const Scores = require('../models/Scores');
 const updateBanScore = (userId, secondsBanned) => {
     getUserScores(userId).then(userScores => {
         if(!userScores) {
-            let userScores = new Scores();
+            userScores = new Scores();
             userScores.userId = userId;
             userScores.bans = 0;
             userScores.bannedSeconds = 0;
