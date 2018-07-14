@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
 const scoresService = require('./services/scoresService');
-const table = require('table');
+const table = require('table').table;
 
 const app = express();
 app.use(bodyParser.json());
