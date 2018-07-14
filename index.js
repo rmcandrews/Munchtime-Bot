@@ -126,6 +126,8 @@ getScorebaordData = () => {
                 displayNameMap[member.id] = member.profile.display_name;
             });
 
+            console.log(displayNameMap);
+
             let scoreboardData = []
             allUserScores.forEach(userScores => {
                 scoreboardData.push({
