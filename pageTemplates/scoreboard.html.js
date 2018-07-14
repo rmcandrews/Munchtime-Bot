@@ -35,8 +35,7 @@ module.exports = `
         <th>Bans</th>
         <th>Time</th>
     </tr>
-    {{tableData}}
-</table>
+    {{{tableData}}}</table>
 </body>
 </html>
 `
