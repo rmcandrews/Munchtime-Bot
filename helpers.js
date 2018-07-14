@@ -12,13 +12,13 @@ const secondsToString = (seconds) => {
     let days = Math.floor((seconds % 31536000) / 86400); 
     let hours = Math.floor(((seconds % 31536000) % 86400) / 3600);
     let minutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
-    let seconds = (((seconds % 31536000) % 86400) % 3600) % 60;
+    let remainingSeconds = (((seconds % 31536000) % 86400) % 3600) % 60;
     let string = ""
     if(years) string += `${years} years `
     if(days) string += `${days} days `
     if(hours) string += `${hours} hours `
     if(minutes) string += `${minutes} minutes `
-    if(seconds) string += `${seconds} seconds `
+    if(remainingSeconds) string += `${remainingSeconds} seconds`
     return string;
 }
 
