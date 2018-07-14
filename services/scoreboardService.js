@@ -12,6 +12,8 @@ const getScoreboard = () => {
 const updateScoreboard = (userId, secondsBanned) => {
     getScoreboard().then(scoreboard => {
         let users = scoreboard.users;
+        console.log("Inital users");
+        console.log(users);
         if(!users[userId]) {
             users[userId] = {
                 totalBans: 0,
@@ -20,8 +22,10 @@ const updateScoreboard = (userId, secondsBanned) => {
         }
         users[userId].totalBans++;
         users[userId].totalBanSecconds += secondsBanned;
+        console.log("Updated users");
         console.log(users);
         Scoreboard.update({ _id: scoreboard.id }, { $set: { users: users }}, (err, updatedScoreboard) => {
+            console.log("DB stuff");
             if (err) console.error(err);
             console.log(updatedScoreboard);
         });
