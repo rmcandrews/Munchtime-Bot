@@ -71,26 +71,31 @@ handleMention = (event) => {
             break;
         case "fortune":
             let fortunes = require('fortune-cookie')
-            web.chat.postMessage(fortunes[Math.floor(Math.random() * fortunes.length)]);
+            postMessage(fortunes[Math.floor(Math.random() * fortunes.length)]);
             break;
         case "leaderboard":
         case "scoreboard":
-            handleLeaderBoard();
+            handleLeaderBoard(event);
             break;
         default:
             postMessage("what that means?");
     }
 };
 
-handleLeaderBoard = () => {
+handleLeaderBoard = (event) => {
     Promise.all([web.users.list(), scoresService.getAllScores()]).then(responses => {
         let users = responses[0];
         let allUserScores = responses[1];
 
+        let displayNameMap = {};
         users.members.forEach(member => {
-            console.log(member.profile.display_name);
+            displayNameMap[member.id] = member.profile.display_name;
         });
-        console.log(allUserScores);
+        let responseText = "";
+        allUserScores.forEach(userScores => {
+            responseText += `*${displayNameMap[userScores.userID]}*:  Bans: ${userScores.bans} Time: ${helpers.secondsToString(userScores.bannedSeconds)}\n`
+        })
+        web.chat.postMessage({ channel: event.channel, text: responseText}).catch(console.error)
     })
 }
 
