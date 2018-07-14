@@ -20,7 +20,19 @@ app.get('/', (req, res) => res.send('Hello World!'))
 
 app.get('/scoreboard', (req, res) => {
     var template = Handlebars.compile(require('./pageTemplates/scoreboard.html'));
-    res.send(template(data));
+    getScorebaordData().then(scoreboardData => {
+        let htmlTableRows = "";
+        scoreboardData.forEach(userScoreData => {
+            htmlTableRows += `
+                <tr>
+                    <td>${userScoreData.name}</td>
+                    <td>${userScoreData.bans}</td>
+                    <td>${userScoreData.bannedTime}</td>
+                </tr>
+            `
+        });
+        res.send(template({tableData: htmlTableRows}));
+    })
 })
 
 
