@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
 const scoresService = require('./services/scoresService');
+const cTable = require('console.table');
 
 const app = express();
 app.use(bodyParser.json());
@@ -91,13 +92,15 @@ handleLeaderBoard = (event) => {
         users.members.forEach(member => {
             displayNameMap[member.id] = member.profile.display_name;
         });
-        let responseText = "User | Bans | Time\n------------- | ------------- | -------------\n";
+        let tableData = [];
         allUserScores.forEach(userScores => {
-            console.log(displayNameMap);
-            console.log(userScores.userId);
-            responseText += `${displayNameMap[userScores.userId]} | ${userScores.bans} | ${helpers.secondsToString(userScores.bannedSeconds)}\n`
+            tableData.push({
+                Name: displayNameMap[userScores.userId],
+                Bans: userScores.bans,
+                Time: helpers.secondsToString(userScores.bannedSeconds)
+            });
         });
-        web.chat.postMessage({ channel: event.channel, text: responseText}).catch(console.error)
+        web.chat.postMessage({ channel: event.channel, text: cTable.getTable(tableData)}).catch(console.error)
     })
 }
 
