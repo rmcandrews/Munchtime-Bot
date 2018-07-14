@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
 const scoresService = require('./services/scoresService');
-const stringTable = require('string-table');
+const table = require('table');
 
 const app = express();
 app.use(bodyParser.json());
@@ -94,13 +94,9 @@ handleLeaderBoard = (event) => {
         });
         let tableData = [];
         allUserScores.forEach(userScores => {
-            tableData.push({
-                Name: displayNameMap[userScores.userId],
-                Bans: userScores.bans,
-                Time: helpers.secondsToString(userScores.bannedSeconds)
-            });
+            tableData.push([displayNameMap[userScores.userId], userScores.bans, helpers.secondsToString(userScores.bannedSeconds)]);
         });
-        web.chat.postMessage({ channel: event.channel, text: stringTable.create(tableData)}).catch(console.error)
+        web.chat.postMessage({ channel: event.channel, text: table(tableData)}).catch(console.error)
     })
 }
 
