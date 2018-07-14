@@ -94,7 +94,7 @@ handleScoreboard = (event) => {
     .then(scoreboardData => {
         let tableData = [];
         scoreboardData.forEach(userScores => {
-            tableData.push([scoreboardData.name, scoreboardData.bans, scoreboardData.bannedTime]);
+            tableData.push([userScores.name, userScores.bans, userScores.bannedTime]);
         });
         let responseString = "```" + table(tableData) + "```";
         web.chat.postMessage({ channel: event.channel, text: responseString}).catch(console.error)
