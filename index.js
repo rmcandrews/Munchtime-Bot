@@ -83,7 +83,9 @@ handleMention = (event) => {
 };
 
 handleLeaderBoard = () => {
-
+    scoresService.getAllScores().then(allScores => {
+        console.log(allScores);
+    });
 }
 
 doesMentionBot = (text) => {

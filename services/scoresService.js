@@ -19,6 +19,13 @@ const getUserScores = (userId) => {
     return Scores.findOne({ userId });
 }
 
+const getAllScores = () => {
+    return new Promise((resolve) => {
+        Scores.find({}).then(resolve)
+    });
+}
+
 module.exports = {
-    updateBanScore
+    updateBanScore,
+    getAllScores
 }
