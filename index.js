@@ -86,6 +86,9 @@ handleLeaderBoard = () => {
     scoresService.getAllScores().then(allScores => {
         console.log(allScores);
     });
+    web.users.list().then(users => {
+        console.log(users);
+    })
 }
 
 doesMentionBot = (text) => {
