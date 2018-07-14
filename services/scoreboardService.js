@@ -25,11 +25,18 @@ const updateScoreboard = (userId, secondsBanned) => {
         users[userId].totalBanSecconds += secondsBanned;
         console.log("Updated users");
         console.log(users);
-        Scoreboard.update({ _id: scoreboard.id }, { $set: { users: users }}, (err, updatedScoreboard) => {
-            console.log("DB stuff");
-            if (err) console.error(err);
-            console.log(updatedScoreboard);
-        });
+        Scoreboard.update({ _id: scoreboard.id }, 
+            { 
+                $set: { 
+                    "users": users 
+                }
+            }, 
+            (err, updatedScoreboard) => {
+                console.log("DB stuff");
+                if (err) console.error(err);
+                console.log(updatedScoreboard);
+            }
+        );
     });
 }
 
