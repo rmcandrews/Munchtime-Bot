@@ -5,7 +5,7 @@ const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
 const scoresService = require('./services/scoresService');
 const table = require('table').table;
-const scoreboardTempalte = require('./pageTemplates/scoreboard.html');
+const Handlebars = require('handlebars/runtime');
 
 const app = express();
 app.use(bodyParser.json());
@@ -18,8 +18,9 @@ const slackEvents = createSlackEventAdapter(process.env.SLACK_VERIFICATION_TOKEN
 app.use('/slack/events', slackEvents.expressMiddleware());
 app.get('/', (req, res) => res.send('Hello World!'))
 
-app.get('/leaderboard', (req, res) => {
-    res.send(scoreboardTempalte);
+app.get('/scoreboard', (req, res) => {
+    var template = Handlebars.compile(require('./pageTemplates/scoreboard.html'));
+    res.send(template(data));
 })
 
 
@@ -81,28 +82,49 @@ handleMention = (event) => {
             break;
         case "leaderboard":
         case "scoreboard":
-            handleLeaderBoard(event);
+            handleScoreboard(event);
             break;
         default:
             postMessage("what that means?");
     }
 };
 
-handleLeaderBoard = (event) => {
-    Promise.all([web.users.list(), scoresService.getAllScores()]).then(responses => {
-        let users = responses[0];
-        let allUserScores = responses[1];
-
-        let displayNameMap = {};
-        users.members.forEach(member => {
-            displayNameMap[member.id] = member.profile.display_name;
-        });
+handleScoreboard = (event) => {
+    getScorebaordData()
+    .then(scoreboardData => {
         let tableData = [];
-        allUserScores.forEach(userScores => {
-            tableData.push([displayNameMap[userScores.userId].trim(), userScores.bans, helpers.secondsToString(userScores.bannedSeconds).trim()]);
+        scoreboardData.forEach(userScores => {
+            tableData.push([scoreboardData.name, scoreboardData.bans, scoreboardData.bannedTime]);
         });
         let responseString = "```" + table(tableData) + "```";
         web.chat.postMessage({ channel: event.channel, text: responseString}).catch(console.error)
+    })
+    .catch(console.error);
+}
+
+getScorebaordData = () => {
+    return new Promise((resolve) => {
+        Promise.all([web.users.list(), scoresService.getAllScores()])
+        .then(responses => {
+            let users = responses[0];
+            let allUserScores = responses[1];
+
+            let displayNameMap = {};
+            users.members.forEach(member => {
+                displayNameMap[member.id] = member.profile.display_name;
+            });
+
+            let scoreboardData = []
+            allUserScores.forEach(userScores => {
+                scoreboardData.push({
+                    name: displayNameMap[userScores.userId].trim(),
+                    bans: userScores.bans,
+                    bannedTime: helpers.secondsToString(userScores.bannedSeconds).trim()
+                })
+            })
+            resolve(scoreboardData);
+        })
+        .catch(reject);
     })
 }
 
