@@ -1,12 +1,12 @@
-const http = require('http'),
-    express = require('express'),
-    bodyParser = require('body-parser'),
-    helpers = require('./helpers'),
-    offenseService = require('./services/offenseService'),
-    scoresService = require('./services/scoresService'),
-    table = require('table').table,
-    fs = require('fs'),
-    path = require('path'),
+const http = require('http');
+const express = require('express');
+const bodyParser = require('body-parser');
+const helpers = require('./helpers');
+const offenseService = require('./services/offenseService');
+const scoresService = require('./services/scoresService');
+const table = require('table').table;
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(bodyParser.json());
