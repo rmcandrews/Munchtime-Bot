@@ -93,7 +93,9 @@ handleLeaderBoard = (event) => {
         });
         let responseText = "";
         allUserScores.forEach(userScores => {
-            responseText += `*${displayNameMap[userScores.userID]}*:  Bans: ${userScores.bans} Time: ${helpers.secondsToString(userScores.bannedSeconds)}\n`
+            console.log(displayNameMap);
+            console.log(userScores.userId);
+            responseText += `*${displayNameMap[userScores.userId]}*:  Bans: ${userScores.bans} Time: ${helpers.secondsToString(userScores.bannedSeconds)}\n`
         });
         web.chat.postMessage({ channel: event.channel, text: responseText}).catch(console.error)
     })
