@@ -1,3 +1,4 @@
+module.exports = `
 <html>
 <head>
     <title>Scoreboard</title>
@@ -38,3 +39,4 @@
 </table>
 </body>
 </html>
+`

@@ -5,8 +5,7 @@ const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
 const scoresService = require('./services/scoresService');
 const table = require('table').table;
-const fs = require('fs');
-const path = require('path');
+const scoreboardTempalte = require('./pageTemplates/scoreboard.html');
 
 const app = express();
 app.use(bodyParser.json());
@@ -20,7 +19,7 @@ app.use('/slack/events', slackEvents.expressMiddleware());
 app.get('/', (req, res) => res.send('Hello World!'))
 
 app.get('/leaderboard', (req, res) => {
-    res.send(fs.readFileSync(path.join(__dirname, './pageTemplates')));
+    res.send(scoreboardTempalte);
 })
 
 
