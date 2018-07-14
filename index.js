@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
-const scoreboardService = require('./services/scoreboardService');
+const scoresService = require('./services/scoresService');
 
 const app = express();
 app.use(bodyParser.json());
@@ -113,7 +113,7 @@ slackEvents.on('message', (event) => {
                                 const twentyFourHoursInSeconds = 86400;
                                 inviteUserAfterTime(event.channel, event.user, twentyFourHoursInSeconds);
                                 offenseService.createOffense(event.user, twentyFourHoursInSeconds);
-                                scoreboardService.updateScoreboard(event.user, twentyFourHoursInSeconds);
+                                scoresService.updateBanScore(event.user, twentyFourHoursInSeconds);
                             })
                             .catch(console.error);
                         } else {
@@ -121,7 +121,7 @@ slackEvents.on('message', (event) => {
                             .then(() => {
                                 inviteUserAfterTime(event.channel, event.user, offenseTime.seconds);
                                 offenseService.createOffense(event.user, offenseTime.seconds);
-                                scoreboardService.updateScoreboard(event.user, offenseTime.seconds);
+                                scoresService.updateBanScore(event.user, offenseTime.seconds);
                             }).catch(console.error);
                         }
                     }).catch(console.error);
@@ -192,7 +192,7 @@ slackEvents.on('member_joined_channel', (event) => {
                         .then(() => {
                             inviteUserAfterTime(event.channel, userWhoKickedMe, offenseTime.seconds);
                             offenseService.createOffense(userWhoKickedMe, offenseTime.seconds);
-                            scoreboardService.updateScoreboard(userWhoKickedMe, offenseTime.seconds);
+                            scoresService.updateBanScore(userWhoKickedMe, offenseTime.seconds);
                             userWhoKickedMe = undefined;
                         }).catch(console.error);
                     }).catch(console.error);
