@@ -136,7 +136,7 @@ getScorebaordData = () => {
             })
 
             scoreboardData.sort((a, b) => {
-              return a.bans > b.bans;
+              return a.bans < b.bans;
             })
             resolve(scoreboardData);
         })
