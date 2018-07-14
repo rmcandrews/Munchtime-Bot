@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
 const scoresService = require('./services/scoresService');
-const cTable = require('console.table');
+const stringTable = require('string-table');
 
 const app = express();
 app.use(bodyParser.json());
@@ -100,7 +100,7 @@ handleLeaderBoard = (event) => {
                 Time: helpers.secondsToString(userScores.bannedSeconds)
             });
         });
-        web.chat.postMessage({ channel: event.channel, text: cTable.getTable(tableData)}).catch(console.error)
+        web.chat.postMessage({ channel: event.channel, text: stringTable.create(tableData)}).catch(console.error)
     })
 }
 
