@@ -83,13 +83,14 @@ handleMention = (event) => {
 };
 
 handleLeaderBoard = () => {
-    scoresService.getAllScores().then(allScores => {
-        console.log(allScores);
-    });
-    web.users.list().then(users => {
+    Promise.all([web.users.list(), scoresService.getAllScores()]).then(responses => {
+        let users = responses[0];
+        let allUserScores = responses[1];
+
         users.members.forEach(member => {
             console.log(member.profile.display_name);
-        })
+        });
+        console.log(allUserScores);
     })
 }
 
