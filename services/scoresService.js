@@ -2,7 +2,16 @@ const Scores = require('../models/Scores');
 
 const updateBanScore = (userId, secondsBanned) => {
     getUserScores(userId).then(userScores => {
-        console.log(userScores);
+        if(!userScores) {
+            let userScores = new Scores();
+            userScores.userId = userId;
+            userScores.bans = 0;
+            userScores.bannedSeconds = 0;
+            userScores.tacos = 0;
+        };
+        userScores.bans++;
+        userScores.bannedSeconds += secondsBanned;
+        userScores.save();
     });
 }
 
