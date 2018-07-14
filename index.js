@@ -87,7 +87,9 @@ handleLeaderBoard = () => {
         console.log(allScores);
     });
     web.users.list().then(users => {
-        console.log(users);
+        users.members.forEach(member => {
+            console.log(member.profile.display_name);
+        })
     })
 }
 
