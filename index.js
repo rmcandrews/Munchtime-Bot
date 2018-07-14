@@ -96,21 +96,8 @@ handleLeaderBoard = (event) => {
         allUserScores.forEach(userScores => {
             tableData.push([displayNameMap[userScores.userId].trim(), userScores.bans, helpers.secondsToString(userScores.bannedSeconds).trim()]);
         });
-        let tableConfig = { columns: {
-                0: {
-                    alignment: 'left',
-                    minWidth: 20
-                },
-                1: {
-                    alignment: 'left',
-                    minWidth: 5
-                },
-                2: {
-                    alignment: 'left',
-                    minWidth: 20
-                }
-        }};
-        web.chat.postMessage({ channel: event.channel, text: table(tableData, tableConfig)}).catch(console.error)
+        let responseString = "```" + table(tableData) + "```";
+        web.chat.postMessage({ channel: event.channel, text: responseString}).catch(console.error)
     })
 }
 
