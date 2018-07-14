@@ -17,7 +17,8 @@
     "fortune-cookie": "0.0.1",
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.21",
-    "mongoose": "^5.2.3"
+    "mongoose": "^5.2.3",
+    "table": "^4.0.3"
   },
   "devDependencies": {}
 }
