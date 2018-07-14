@@ -14,11 +14,11 @@ const secondsToString = (seconds) => {
     let minutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
     let remainingSeconds = (((seconds % 31536000) % 86400) % 3600) % 60;
     let string = ""
-    if(years) string += `${years} years `
-    if(days) string += `${days} days `
-    if(hours) string += `${hours} hours `
-    if(minutes) string += `${minutes} minutes `
-    if(remainingSeconds) string += `${remainingSeconds} seconds`
+    if(years) string += `${years} y `
+    if(days) string += `${days} d `
+    if(hours) string += `${hours} h `
+    if(minutes) string += `${minutes} m `
+    if(remainingSeconds) string += `${remainingSeconds} s`
     return string;
 }
 
