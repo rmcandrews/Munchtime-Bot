@@ -91,11 +91,11 @@ handleLeaderBoard = (event) => {
         users.members.forEach(member => {
             displayNameMap[member.id] = member.profile.display_name;
         });
-        let responseText = "";
+        let responseText = "User | Bans | Time\n------------- | ------------- | -------------\n";
         allUserScores.forEach(userScores => {
             console.log(displayNameMap);
             console.log(userScores.userId);
-            responseText += `*${displayNameMap[userScores.userId]}*:  Bans: ${userScores.bans} Time: ${helpers.secondsToString(userScores.bannedSeconds)}\n`
+            responseText += `${displayNameMap[userScores.userId]} | ${userScores.bans} | ${helpers.secondsToString(userScores.bannedSeconds)}\n`
         });
         web.chat.postMessage({ channel: event.channel, text: responseText}).catch(console.error)
     })
