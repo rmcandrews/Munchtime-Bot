@@ -103,7 +103,7 @@ handleScoreboard = (event) => {
 }
 
 getScorebaordData = () => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         Promise.all([web.users.list(), scoresService.getAllScores()])
         .then(responses => {
             let users = responses[0];
