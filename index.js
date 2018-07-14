@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
+const scoreboardService = require('./services/scoreboardService');
 
 const app = express();
 app.use(bodyParser.json());
@@ -72,10 +73,18 @@ handleMention = (event) => {
             let fortunes = require('fortune-cookie')
             web.chat.postMessage(fortunes[Math.floor(Math.random() * fortunes.length)]);
             break;
+        case "leaderboard":
+        case "scoreboard":
+            handleLeaderBoard();
+            break;
         default:
             postMessage("what that means?");
     }
 };
+
+handleLeaderBoard = () => {
+
+}
 
 doesMentionBot = (text) => {
     return text.includes("UBP9JBB2B");
@@ -101,7 +110,10 @@ slackEvents.on('message', (event) => {
                         if(doesMentionBot(event.text)) {
                             web.chat.postMessage({ channel: event.channel, text: `${user.real_name} insulted my mother and is therefore kicked for 24 hours.` })
                             .then(() => {
-                                inviteUserAfterTime(event.channel, event.user, 86400);
+                                const twentyFourHoursInSeconds = 86400;
+                                inviteUserAfterTime(event.channel, event.user, twentyFourHoursInSeconds);
+                                offenseService.createOffense(event.user, twentyFourHoursInSeconds);
+                                scoreboardService.updateScoreboard(event.user, twentyFourHoursInSeconds);
                             })
                             .catch(console.error);
                         } else {
@@ -109,8 +121,8 @@ slackEvents.on('message', (event) => {
                             .then(() => {
                                 inviteUserAfterTime(event.channel, event.user, offenseTime.seconds);
                                 offenseService.createOffense(event.user, offenseTime.seconds);
-                            })
-                            .catch(console.error);
+                                scoreboardService.updateScoreboard(event.user, offenseTime.seconds);
+                            }).catch(console.error);
                         }
                     }).catch(console.error);
                 }).catch(console.error);
@@ -180,6 +192,7 @@ slackEvents.on('member_joined_channel', (event) => {
                         .then(() => {
                             inviteUserAfterTime(event.channel, userWhoKickedMe, offenseTime.seconds);
                             offenseService.createOffense(userWhoKickedMe, offenseTime.seconds);
+                            scoreboardService.updateScoreboard(userWhoKickedMe, offenseTime.seconds);
                             userWhoKickedMe = undefined;
                         }).catch(console.error);
                     }).catch(console.error);
