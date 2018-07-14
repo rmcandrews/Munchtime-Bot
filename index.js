@@ -5,7 +5,7 @@ const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
 const scoresService = require('./services/scoresService');
 const table = require('table').table;
-const Handlebars = require('handlebars/runtime');
+const Handlebars = require('handlebars');
 
 const app = express();
 app.use(bodyParser.json());
