@@ -70,7 +70,29 @@ handleMention = (event) => {
             break;
         case "fortune":
             let fortunes = require('fortune-cookie')
-            web.chat.postMessage(fortunes[Math.floor(Math.random() * fortunes.length)]);
+            postMessage(fortunes[Math.floor(Math.random() * fortunes.length)]);
+            break;
+        case "leaderboard":
+            // Sums up offenses from every day per userId
+            let totalUserOffenses = {};
+            for(var date in dailyOffenses) {
+                for(var userId in dailyOffenses[date]) {
+                    if(!totalUserOffenses.has(userId)) {
+                        totalUserOffenses[userId] = 0;
+                    }
+                    totalUserOffenses[userId] += dailyOffenses[date][userId]
+                }
+            }
+            // TODO Users that never commit an offense do not display
+            // TODO Sort by total offenses before generating leaderboard text
+            let leaderboardText;
+            let i = 1;
+            for(var userId in totalUserOffenses) {
+                // Won't look uniform for i > 9
+                leaderboardText += `${i} - ${userIdDisplayMap[userId]}\n`;
+                i++;
+            }
+            postMessage(leaderboardText);
             break;
         default:
             postMessage("what that means?");
