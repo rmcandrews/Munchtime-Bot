@@ -6,6 +6,7 @@ const offenseService = require('./services/offenseService');
 const scoresService = require('./services/scoresService');
 const table = require('table').table;
 const Handlebars = require('handlebars');
+const speak = require("speakeasy-nlp");
 
 const app = express();
 app.use(bodyParser.json());
@@ -38,8 +39,11 @@ app.get('/scoreboard', (req, res) => {
 
 const port = process.env.PORT || 3000;
 
-const bannedSubstrings = ["ur mom", "u r mom", "your mom" , "your mother"];
-
+const minPositivityScore = 1; // min positive sentiment score tolerated (higher num == less tolerant)
+const maxNegativityScore = 0; // max negative sentiment score tolerated (higher num == more tolerant)
+// TODO Move trigger words to seperate file/database
+const bannedSubstrings = ["ur mom", "u r mom", "ur mum", "u r mum", "ur mother", "u r mother", "your mom", "your mum", "your mother", "you're mom", "you're mum", "you're mother", "youre mom", "youre mum", "youre mother"];
+ 
 let userWhoKickedMe;
 
 getOffenseTime = (offenseNumber) => {
@@ -66,8 +70,8 @@ getOffenseTime = (offenseNumber) => {
 
 didUseBannedWords = (text) => {
     return bannedSubstrings.some((bannedSubstring) => { 
-        return text.toLowerCase().includes(bannedSubstring); 
-    });
+        return text.toLowerCase().includes(bannedSubstring);
+    }) && (speak.sentiment.negativity(text).score > maxNegativityScore || speak.sentiment.positivity(text).score < minPositivityScore);
 }
 
 inviteUserAfterTime = (channel, user, seconds) => {
