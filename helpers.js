@@ -7,4 +7,22 @@ let ordinalOf = (i) => {
     return i + "th";
 }
 
-module.exports = { ordinalOf }
+const secondsToString = (seconds) => {
+    let years = Math.floor(seconds / 31536000);
+    let days = Math.floor((seconds % 31536000) / 86400); 
+    let hours = Math.floor(((seconds % 31536000) % 86400) / 3600);
+    let minutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
+    let remainingSeconds = (((seconds % 31536000) % 86400) % 3600) % 60;
+    let string = ""
+    if(years) string += `${years} y `
+    if(days) string += `${days} d `
+    if(hours) string += `${hours} h `
+    if(minutes) string += `${minutes} m `
+    if(remainingSeconds) string += `${remainingSeconds} s`
+    return string;
+}
+
+module.exports = { 
+    ordinalOf,
+    secondsToString
+}

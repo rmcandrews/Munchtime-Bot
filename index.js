@@ -3,6 +3,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
+const scoresService = require('./services/scoresService');
+const table = require('table').table;
+const Handlebars = require('handlebars');
 const speak = require("speakeasy-nlp");
 
 const app = express();
@@ -15,6 +18,23 @@ const slackEvents = createSlackEventAdapter(process.env.SLACK_VERIFICATION_TOKEN
 
 app.use('/slack/events', slackEvents.expressMiddleware());
 app.get('/', (req, res) => res.send('Hello World!'))
+
+app.get('/scoreboard', (req, res) => {
+    var template = Handlebars.compile(require('./pageTemplates/scoreboard.html'));
+    getScorebaordData().then(scoreboardData => {
+        let htmlTableRows = "";
+        scoreboardData.forEach(userScoreData => {
+            htmlTableRows += `
+                <tr>
+                    <td>${userScoreData.name}</td>
+                    <td>${userScoreData.bans}</td>
+                    <td>${userScoreData.bannedTime}</td>
+                </tr>
+            `
+        });
+        res.send(template({tableData: htmlTableRows}));
+    })
+})
 
 
 const port = process.env.PORT || 3000;
@@ -74,12 +94,59 @@ handleMention = (event) => {
             break;
         case "fortune":
             let fortunes = require('fortune-cookie')
-            web.chat.postMessage(fortunes[Math.floor(Math.random() * fortunes.length)]);
+            postMessage(fortunes[Math.floor(Math.random() * fortunes.length)]);
+            break;
+        case "leaderboard":
+        case "scoreboard":
+            handleScoreboard(event);
             break;
         default:
             postMessage("what that means?");
     }
 };
+
+handleScoreboard = (event) => {
+    getScorebaordData()
+    .then(scoreboardData => {
+        let tableData = [];
+        scoreboardData.forEach(userScores => {
+            tableData.push([userScores.name, userScores.bans, userScores.bannedTime]);
+        });
+        let responseString = "```" + table(tableData) + "```\n" + `Pretty web page: ${process.env.BASE_URL}/scoreboard`;
+        web.chat.postMessage({ channel: event.channel, text: responseString}).catch(console.error)
+    })
+    .catch(console.error);
+}
+
+getScorebaordData = () => {
+    return new Promise((resolve, reject) => {
+        Promise.all([web.users.list(), scoresService.getAllScores()])
+        .then(responses => {
+            let users = responses[0];
+            let allUserScores = responses[1];
+
+            let displayNameMap = {};
+            users.members.forEach(member => {
+                displayNameMap[member.id] = member.profile.display_name || member.profile.real_name;
+            });
+
+            let scoreboardData = []
+            allUserScores.forEach(userScores => {
+                scoreboardData.push({
+                    name: displayNameMap[userScores.userId].trim(),
+                    bans: userScores.bans,
+                    bannedTime: helpers.secondsToString(userScores.bannedSeconds).trim()
+                })
+            })
+
+            scoreboardData.sort((a, b) => {
+              return a.bans < b.bans;
+            })
+            resolve(scoreboardData);
+        })
+        .catch(reject);
+    })
+}
 
 doesMentionBot = (text) => {
     return text.includes("UBP9JBB2B");
@@ -105,7 +172,10 @@ slackEvents.on('message', (event) => {
                         if(doesMentionBot(event.text)) {
                             web.chat.postMessage({ channel: event.channel, text: `${user.real_name} insulted my mother and is therefore kicked for 24 hours.` })
                             .then(() => {
-                                inviteUserAfterTime(event.channel, event.user, 86400);
+                                const twentyFourHoursInSeconds = 86400;
+                                inviteUserAfterTime(event.channel, event.user, twentyFourHoursInSeconds);
+                                offenseService.createOffense(event.user, twentyFourHoursInSeconds);
+                                scoresService.updateBanScore(event.user, twentyFourHoursInSeconds);
                             })
                             .catch(console.error);
                         } else {
@@ -113,8 +183,8 @@ slackEvents.on('message', (event) => {
                             .then(() => {
                                 inviteUserAfterTime(event.channel, event.user, offenseTime.seconds);
                                 offenseService.createOffense(event.user, offenseTime.seconds);
-                            })
-                            .catch(console.error);
+                                scoresService.updateBanScore(event.user, offenseTime.seconds);
+                            }).catch(console.error);
                         }
                     }).catch(console.error);
                 }).catch(console.error);
@@ -184,6 +254,7 @@ slackEvents.on('member_joined_channel', (event) => {
                         .then(() => {
                             inviteUserAfterTime(event.channel, userWhoKickedMe, offenseTime.seconds);
                             offenseService.createOffense(userWhoKickedMe, offenseTime.seconds);
+                            scoresService.updateBanScore(userWhoKickedMe, offenseTime.seconds);
                             userWhoKickedMe = undefined;
                         }).catch(console.error);
                     }).catch(console.error);
