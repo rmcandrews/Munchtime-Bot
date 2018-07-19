@@ -101,7 +101,8 @@ handleMention = (event) => {
             handleScoreboard(event);
             break;
         default:
-            postMessage("what that means?");
+            let fortunes = require('fortune-cookie')
+            postMessage(fortunes[Math.floor(Math.random() * fortunes.length)]);
     }
 };
 
