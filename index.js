@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
 const scoresService = require('./services/scoresService');
+const tacoService = require('./services/tacoService');
 const table = require('table').table;
 const Handlebars = require('handlebars');
 const speak = require("speakeasy-nlp");
@@ -21,7 +22,7 @@ app.get('/', (req, res) => res.send('Hello World!'))
 
 app.get('/scoreboard', (req, res) => {
     var template = Handlebars.compile(require('./pageTemplates/scoreboard.html'));
-    getScorebaordData().then(scoreboardData => {
+    getScoreboardData().then(scoreboardData => {
         let htmlTableRows = "";
         scoreboardData.forEach(userScoreData => {
             htmlTableRows += `
@@ -29,6 +30,8 @@ app.get('/scoreboard', (req, res) => {
                     <td>${userScoreData.name}</td>
                     <td>${userScoreData.bans}</td>
                     <td>${userScoreData.bannedTime}</td>
+                    <td>${userScoreData.totalTacosGiven}</td>
+                    <td>${userScoreData.totalTacosReceived}</td>
                 </tr>
             `
         });
@@ -100,17 +103,27 @@ handleMention = (event) => {
         case "scoreboard":
             handleScoreboard(event);
             break;
+        case "tacos":
+        case "taco":
+            postMessage("@ a user in the same message as the tacos you'd like to give them. You can give up to 10 in a day. Include the reason for the gift in your message");
+            break;
+        case "help":
+            postMessage("@ me with one of the keywords: status, fortune, scoreboard, taco, or help");
+            break;
+        case "help me":
+            postMessage("Not even God can help you.");
+            break;
         default:
             postMessage("what that means?");
     }
 };
 
 handleScoreboard = (event) => {
-    getScorebaordData()
+    getScoreboardData()
     .then(scoreboardData => {
         let tableData = [];
         scoreboardData.forEach(userScores => {
-            tableData.push([userScores.name, userScores.bans, userScores.bannedTime]);
+            tableData.push([userScores.name, userScores.bans, userScores.bannedTime, userScores.totalTacosGiven, userScores.totalTacosReceived]);
         });
         let responseString = "```" + table(tableData) + "```\n" + `Pretty web page: ${process.env.BASE_URL}/scoreboard`;
         web.chat.postMessage({ channel: event.channel, text: responseString}).catch(console.error)
@@ -118,7 +131,7 @@ handleScoreboard = (event) => {
     .catch(console.error);
 }
 
-getScorebaordData = () => {
+getScoreboardData = () => {
     return new Promise((resolve, reject) => {
         Promise.all([web.users.list(), scoresService.getAllScores()])
         .then(responses => {
@@ -135,7 +148,9 @@ getScorebaordData = () => {
                 scoreboardData.push({
                     name: displayNameMap[userScores.userId].trim(),
                     bans: userScores.bans,
-                    bannedTime: helpers.secondsToString(userScores.bannedSeconds).trim()
+                    bannedTime: helpers.secondsToString(userScores.bannedSeconds).trim(),
+                    totalTacosGiven: userScores.totalTacosGiven,
+                    totalTacosReceived: userScores.totalTacosReceived
                 })
             })
 
@@ -223,14 +238,29 @@ slackEvents.on('message', (event) => {
             }
         }
 
-        //Handle if someone has tacos. Will later expand this to actually track tacos.
+        //Handle if someone gives tacos.
         if(event.text && event.text.includes(":taco:")) {
-            web.users.info({
-                user: event.user
-            }).then(response => {
-                let user = response.user;
-                web.chat.postMessage({ channel: event.channel, text: `@${user.profile.display_name} HAVE SOME TACOS!!! :taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco::taco:` }).catch(console.error);
-            }).catch(console.error);
+            const numNewTacos = helpers.countStringOccurances(event.text, ":taco:");
+            tacoService.getNumberOfGiftedTacosByUserInLastDay(event.user)
+            .then((giftedTacos) => {
+                if(event.text.split('>').length > 2) {
+                    web.chat.postMessage({ channel: event.channel , text: "You can only give tacos to one person at a time (for now)" }).catch(console.error);
+                } else if(numNewTacos > 10) {
+                    web.chat.postMessage({ channel: event.channel, text: "You can only give up to 10 tacos a day" }).catch(console.error);
+                } else if(giftedTacos.length+numNewTacos > 10) {
+                    // Don't allow to gift these tacos. Tell them NO! BAD DOG! and the num of tacos they can still give today.
+                    web.chat.postMessage({ channel: event.channel , text: `<@${event.user}> you can only give 10 tacos in a day. You have ${10-giftedTacos.length} left to give today.` }).catch(console.error);
+                } else {
+                    // Mentions are in the format of <@userId> (I think). This will get us a userid.
+                    const tacoRecipientId = event.text.split('@').pop().split('>');
+                    // Removes tacos and <@userid> from the message and the rest is the reason for the gift
+                    const reasonForGifting = event.text.replace(':taco:', '').replace(/<.*>/, '');
+                    scoresService.updateTacoScore(tacoRecipientId, 0, numTacos);
+                    scoresService.updateTacoScore(event.user, numTacos, 0);
+                    tacoService.createTaco(tacoRecipientId, event.user, numNewTacos, reasonForGifting);
+                    web.chat.postMessage({ channel: event.channel , text: `<@${event.user}> gave <@${tacoRecipientId}> ${numNewTacos} taco(s).` }).catch(console.error);
+                }
+            })
         }
     }
 });

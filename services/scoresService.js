@@ -7,10 +7,26 @@ const updateBanScore = (userId, secondsBanned) => {
             userScores.userId = userId;
             userScores.bans = 0;
             userScores.bannedSeconds = 0;
-            userScores.tacos = 0;
+            userScores.totalTacosGiven = 0;
+            userScores.totalTacosReceived = 0;
         };
         userScores.bans++;
         userScores.bannedSeconds += secondsBanned;
+        userScores.save();
+    });
+}
+
+const updateTacoScore = (userId, additionalTacosGiven, additionalTacosReceived) => {
+    getUserScores(userId).then(userScores => {
+        if(!userScores) {
+            userScores = new Scores();
+            userScores.userId = userId;
+            userScores.bans = 0;
+            userScores.totalTacosGiven = 0;
+            userScores.totalTacosReceived = 0;
+        };
+        userScores.totalTacosGiven += additionalTacosGiven;
+        userScores.totalTacosReceived += additionalTacosReceived;
         userScores.save();
     });
 }

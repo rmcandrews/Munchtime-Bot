@@ -4,7 +4,8 @@ const Schema = new db.Schema({
     userId: String,
     bans: Number,
     bannedSeconds: Number,
-    tacos: Number
+    totalTacosGiven: Number,
+    totalTacosReceived: Number
 });
 
 const Scores = db.model('Scores', Schema);
