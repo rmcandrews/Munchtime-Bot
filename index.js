@@ -265,6 +265,13 @@ slackEvents.on('member_joined_channel', (event) => {
     }
 });
 
+slack.on('reaction_added', (event) => {
+  if (update.reaction !== "kick") {
+    return;
+  }
+  web.chat.postMessage({ channel: event.item.channel, text: "SOON(tm)" });
+});
+
 // Handle errors (see `errorCodes` export)
 slackEvents.on('error', console.error);
 
