@@ -88,12 +88,12 @@ handleMention = (event) => {
         web.chat.postMessage({ channel: event.channel, text: text}).catch(console.error)
     }
     let command = event.text.split(">").pop().trim();
+    let fortunes = require('fortune-cookie')
     switch(command) {
         case "status":
             postMessage("I'm doing p good");
             break;
         case "fortune":
-            let fortunes = require('fortune-cookie')
             postMessage(fortunes[Math.floor(Math.random() * fortunes.length)]);
             break;
         case "leaderboard":
@@ -101,7 +101,7 @@ handleMention = (event) => {
             handleScoreboard(event);
             break;
         default:
-            postMessage("what that means?");
+            postMessage(fortunes[Math.floor(Math.random() * fortunes.length)]);
     }
 };
 
