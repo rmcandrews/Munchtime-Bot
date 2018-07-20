@@ -277,7 +277,9 @@ slackEvents.on('reaction_added', (event) => {
       file: event.item.file,
       file_comment: event.item.file_comment,
       full: true
-    }
+    };
+
+    console.log(reactionGetOptions);
     
     web.reactions.get(reactionGetOptions).then(response => {
         let reactions = response[response.type].reactions;
@@ -287,7 +289,7 @@ slackEvents.on('reaction_added', (event) => {
         if(kickReaction && kickReaction.count >= 1) {
             web.chat.postMessage({ channel: event.item.channel, text: "SOON(tm)" });
         }
-    })
+    }).catch(console.error);
 });
 
 // Handle errors (see `errorCodes` export)
