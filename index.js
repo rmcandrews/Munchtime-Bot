@@ -290,6 +290,7 @@ slackEvents.on('reaction_added', (event) => {
         if(kickReaction && kickReaction.count >= 1 && !hasBeenKickedForMessageAlready) {
             voteKickedMessages.push(event.item.ts || event.item.file || event.item.file_comment);
             let userId = reactedToItem.user;
+            console.log(userId);
             web.groups.kick({
                 channel: channelId,
                 user: userId
@@ -297,6 +298,7 @@ slackEvents.on('reaction_added', (event) => {
                 web.users.info({
                     user: userId
                 }).then(response => {
+                    console.log(response);
                     let user = response.user;
                     offenseService.getOffensesForUserInLast24Hours(userId)
                     .then(userOffenses => {
