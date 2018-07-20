@@ -265,6 +265,8 @@ slackEvents.on('member_joined_channel', (event) => {
     }
 });
 
+let voteKickedMessages = [];
+
 slackEvents.on('reaction_added', (event) => {
     if (event.reaction !== "kick") {
         return;
@@ -284,7 +286,9 @@ slackEvents.on('reaction_added', (event) => {
         let reactions = reactedToItem.reactions;
         let kickReaction = reactions.find(reaction => reaction.name === "kick");
 
-        if(kickReaction && kickReaction.count >= 1) {
+        let hasBeenKickedForMessageAlready = voteKickedMessages.includes(event.item.ts) || voteKickedMessages.includes(event.item.file) || voteKickedMessages.includes(event.item.file_comment);
+        if(kickReaction && kickReaction.count >= 1 && !hasBeenKickedForMessageAlready) {
+            voteKickedMessages.push(event.item.ts || event.item.file || event.item.file_comment);
             let userId = reactedToItem.user;
             web.groups.kick({
                 channel: channelId,
