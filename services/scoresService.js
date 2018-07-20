@@ -41,6 +41,7 @@ const getAllScores = () => {
     });
 }
 
+
 module.exports = {
     updateBanScore,
     updateTacoScore,
