@@ -269,7 +269,7 @@ let voteKickedMessages = [];
 
 slackEvents.on('reaction_added', (event) => {
 
-    if (event.reaction !== "kick" || event.channel === process.env.IGNORE_CHANNEL) {
+    if (event.reaction !== "kick" || event.item.channel === process.env.IGNORE_CHANNEL) {
         return;
     }
     
