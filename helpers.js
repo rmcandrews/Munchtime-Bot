@@ -44,5 +44,6 @@ const countStringOccurrences = (string, subString, allowOverlapping) => {
 
 module.exports = { 
     ordinalOf,
-    secondsToString
+    secondsToString,
+    countStringOccurrences
 }
