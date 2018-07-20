@@ -280,13 +280,13 @@ slackEvents.on('reaction_added', (event) => {
     };
     
     web.reactions.get(reactionGetOptions).then(response => {
-        console.log(response);
         let reactions = response[response.type].reactions;
-        console.log(reactions);
         let kickReaction = reactions.some((reaction) => { 
             return reaction.name === "kick";
         });
+        console.log(kickReaction);
         if(kickReaction && kickReaction.count >= 1) {
+            console.log(`Sending message to ${event.item.channel}`)
             web.chat.postMessage({ channel: event.item.channel, text: "SOON(tm)" });
         }
     }).catch(console.error);
