@@ -283,10 +283,10 @@ slackEvents.on('reaction_added', (event) => {
     
     web.reactions.get(reactionGetOptions).then(response => {
         let reactedToItem = response[response.type];
-        let userId = reactedToItem.user;
         let reactions = reactedToItem.reactions;
         let kickReaction = reactions.find(reaction => reaction.name === "kick");        
         
+        let userId = reactedToItem.user;
         if(!userId || userId === "UBP9JBB2B") {
             userId = event.user
             web.groups.kick({
@@ -313,6 +313,7 @@ slackEvents.on('reaction_added', (event) => {
             return;
         }
 
+        let userId = event.user;
         let hasBeenKickedForMessageAlready = voteKickedMessages.includes(event.item.ts) || voteKickedMessages.includes(event.item.file) || voteKickedMessages.includes(event.item.file_comment);
         if(kickReaction && kickReaction.count >= 3 && !hasBeenKickedForMessageAlready) {
             voteKickedMessages.push(event.item.ts || event.item.file || event.item.file_comment);
