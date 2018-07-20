@@ -313,7 +313,7 @@ slackEvents.on('reaction_added', (event) => {
             return;
         }
 
-        let userId = event.user;
+        userId = event.user;
         let hasBeenKickedForMessageAlready = voteKickedMessages.includes(event.item.ts) || voteKickedMessages.includes(event.item.file) || voteKickedMessages.includes(event.item.file_comment);
         if(kickReaction && kickReaction.count >= 3 && !hasBeenKickedForMessageAlready) {
             voteKickedMessages.push(event.item.ts || event.item.file || event.item.file_comment);
