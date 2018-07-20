@@ -290,7 +290,7 @@ slackEvents.on('reaction_added', (event) => {
         if(kickReaction && kickReaction.count >= 3 && !hasBeenKickedForMessageAlready) {
             voteKickedMessages.push(event.item.ts || event.item.file || event.item.file_comment);
             let userId = reactedToItem.user;
-            if(!userId) {
+            if(!userId || userId === "UBP9JBB2B") {
                 userId = event.user
                 web.groups.kick({
                     channel: channelId,
