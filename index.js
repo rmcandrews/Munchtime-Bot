@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const helpers = require('./helpers');
 const offenseService = require('./services/offenseService');
 const scoresService = require('./services/scoresService');
-const tacoService = require('./services/tacoService');
+const tacoTransactionService = require('./services/tacoTransactionService');
 const table = require('table').table;
 const Handlebars = require('handlebars');
 const speak = require("speakeasy-nlp");
@@ -241,8 +241,12 @@ slackEvents.on('message', (event) => {
         //Handle if someone gives tacos.
         if(event.text && event.text.includes(":taco:")) {
             const numNewTacos = helpers.countStringOccurances(event.text, ":taco:");
-            tacoService.getNumberOfGiftedTacosByUserInLastDay(event.user)
-            .then((giftedTacos) => {
+            tacoTransactionService.getNumberOfGiftedTacoTransactionsByUserInLastDay(event.user)
+            .then((tacoTransactions) => {
+                let giftedTacos = 0;
+                tacoTransactions.forEach((tacoTransaction) => {
+                    giftedTacos += tacoTransaction.number;
+                });
                 if(event.text.split('>').length > 2) {
                     web.chat.postMessage({ channel: event.channel , text: "You can only give tacos to one person at a time (for now)" }).catch(console.error);
                 } else if(numNewTacos > 10) {
@@ -257,7 +261,7 @@ slackEvents.on('message', (event) => {
                     const reasonForGifting = event.text.replace(':taco:', '').replace(/<.*>/, '');
                     scoresService.updateTacoScore(tacoRecipientId, 0, numTacos);
                     scoresService.updateTacoScore(event.user, numTacos, 0);
-                    tacoService.createTaco(tacoRecipientId, event.user, numNewTacos, reasonForGifting);
+                    tacoTransactionService.createTacoTransaction(tacoRecipientId, event.user, numNewTacos, reasonForGifting);
                     web.chat.postMessage({ channel: event.channel , text: `<@${event.user}> gave <@${tacoRecipientId}> ${numNewTacos} taco(s).` }).catch(console.error);
                 }
             })

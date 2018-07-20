@@ -10,6 +10,6 @@ const Schema = new db.Schema({
     timestamps: {}
 });
 
-const Taco = db.model('Taco', Schema);
+const TacoTransaction = db.model('TacoTransaction', Schema);
 
-module.exports = Taco;
+module.exports = TacoTransaction;
