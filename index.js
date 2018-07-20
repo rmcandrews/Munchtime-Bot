@@ -271,7 +271,6 @@ slackEvents.on('reaction_added', (event) => {
     }
     
     let channelId = event.item.channel;
-    console.log(event.item);
     let reactionGetOptions = {
       channel: channelId,
       timestamp: event.item.ts,
@@ -279,10 +278,9 @@ slackEvents.on('reaction_added', (event) => {
       file_comment: event.item.file_comment,
       full: true
     };
-
-    console.log(reactionGetOptions);
     
     web.reactions.get(reactionGetOptions).then(response => {
+        console.log(reactions);
         let reactions = response[response.type].reactions;
         let kickReaction = reactions.some((reaction) => { 
             return reaction.name === "kick";
