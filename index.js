@@ -281,9 +281,7 @@ slackEvents.on('reaction_added', (event) => {
     
     web.reactions.get(reactionGetOptions).then(response => {
         let reactions = response[response.type].reactions;
-        let kickReaction = reactions.some((reaction) => { 
-            return reaction.name === "kick";
-        });
+        let kickReaction = reactions.filter(reaction => reaction.name === "kick");
         console.log(kickReaction);
         if(kickReaction && kickReaction.count >= 1) {
             console.log(`Sending message to ${event.item.channel}`)
