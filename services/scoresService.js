@@ -22,11 +22,12 @@ const updateTacoScore = (userId, additionalTacosGiven, additionalTacosReceived) 
             userScores = new Scores();
             userScores.userId = userId;
             userScores.bans = 0;
+            userScores.bannedSeconds = 0;
             userScores.totalTacosGiven = 0;
             userScores.totalTacosReceived = 0;
         };
-        userScores.totalTacosGiven += additionalTacosGiven;
-        userScores.totalTacosReceived += additionalTacosReceived;
+        userScores.totalTacosGiven = (userScores.totalTacosGiven || 0) + additionalTacosGiven;
+        userScores.totalTacosReceived = (userScores.totalTacosReceived || 0) + additionalTacosReceived;
         userScores.save();
     });
 }

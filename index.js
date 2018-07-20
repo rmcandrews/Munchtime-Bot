@@ -150,8 +150,8 @@ getScoreboardData = () => {
                     name: displayNameMap[userScores.userId].trim(),
                     bans: userScores.bans,
                     bannedTime: helpers.secondsToString(userScores.bannedSeconds).trim(),
-                    totalTacosGiven: userScores.totalTacosGiven,
-                    totalTacosReceived: userScores.totalTacosReceived
+                    totalTacosGiven: userScores.totalTacosGiven || 0,
+                    totalTacosReceived: userScores.totalTacosReceived || 0
                 })
             })
 
