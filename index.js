@@ -240,7 +240,7 @@ slackEvents.on('message', (event) => {
 
         //Handle if someone gives tacos.
         if(event.text && event.text.includes(":taco:")) {
-            const numNewTacos = helpers.countStringOccurances(event.text, ":taco:");
+            const numNewTacos = helpers.countStringOccurrences(event.text, ":taco:");
             tacoTransactionService.getNumberOfGiftedTacoTransactionsByUserInLastDay(event.user)
             .then((tacoTransactions) => {
                 let giftedTacos = 0;
