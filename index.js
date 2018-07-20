@@ -6,6 +6,7 @@ const offenseService = require('./services/offenseService');
 const scoresService = require('./services/scoresService');
 const table = require('table').table;
 const Handlebars = require('handlebars');
+const CronJob = require('cron').CronJob;
 const speak = require("speakeasy-nlp");
 
 const app = express();
@@ -270,3 +271,11 @@ slackEvents.on('error', console.error);
 http.createServer(app).listen(port, () => {
     console.log(`server listening on port ${port}`);
 });
+
+new CronJob('0 9 * * 1-5', () => {
+  if(Math.random() < 1) {
+    setTimeout(() => {
+        web.chat.postMessage({ channel: process.env.CHANNEL_ID, text: "gm, happy to be @here" })
+    }, Math.random() * 60 * 30 * 1000) ;
+  }
+}, null, true, 'America/Chicago');
