@@ -265,7 +265,7 @@ slackEvents.on('member_joined_channel', (event) => {
     }
 });
 
-slack.on('reaction_added', (event) => {
+slackEvents.on('reaction_added', (event) => {
     if (event.reaction !== "kick") {
         return;
     }
