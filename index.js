@@ -266,10 +266,28 @@ slackEvents.on('member_joined_channel', (event) => {
 });
 
 slack.on('reaction_added', (event) => {
-  if (update.reaction !== "kick") {
-    return;
-  }
-  web.chat.postMessage({ channel: event.item.channel, text: "SOON(tm)" });
+    if (event.reaction !== "kick") {
+        return;
+    }
+    
+    let channelId = event.item.channel;
+    let reactionGetOptions = {
+      channel: channelId,
+      timestamp: event.item.timestamp,
+      file: event.item.file,
+      file_comment: event.item.file_comment,
+      full: true
+    }
+    
+    web.reactions.get(reactionGetOptions).then(response => {
+        let reactions = response[response.type].reactions;
+        let kickReaction = reactions.some((reaction) => { 
+            return reaction.name === "kick";
+        });
+        if(kickReaction && kickReaction.count >= 1) {
+            web.chat.postMessage({ channel: event.item.channel, text: "SOON(tm)" });
+        }
+    })
 });
 
 // Handle errors (see `errorCodes` export)
