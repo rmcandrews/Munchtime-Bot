@@ -243,10 +243,9 @@ slackEvents.on('message', (event) => {
 
         //Handle if someone gives tacos. Need to make sure they also mention someone
         if(event.text && event.text.includes(":taco:") && event.text.includes(">")) {
-            console.log(event.text);
             const numNewTacos = helpers.countStringOccurrences(event.text, ":taco:");
             // Mentions are in the format of <@userId>. This will get us a userid.
-            const tacoRecipientId = event.text.split('@').pop().split('>').shift();
+            const tacoRecipientId = event.text.split('<').pop().split('>').shift().replace('@', '').trim();
             tacoTransactionService.getNumberOfGiftedTacoTransactionsByUserInLastDay(event.user)
             .then((tacoTransactions) => {
                 let giftedTacos = 0;
