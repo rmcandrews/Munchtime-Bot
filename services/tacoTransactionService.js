@@ -12,7 +12,7 @@ const createTacoTransaction = (recipientUserId, giverUserId, number, reason) => 
     });
 };
 
-const getNumberOfGiftedTacoTransactionsByUserInLastDay = (userid) => {
+const getNumberOfGiftedTacoTransactionsByUserInLastDay = (userId) => {
     return TacoTransaction.find({
         giverUserId: userId,
         createdAt: { $gt: new Date(new Date().setHours(0,0,0,0)) }
