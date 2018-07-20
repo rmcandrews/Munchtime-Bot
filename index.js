@@ -314,7 +314,6 @@ slackEvents.on('reaction_added', (event) => {
             return;
         }
 
-        userId = event.user;
         let hasBeenKickedForMessageAlready = voteKickedMessages.includes(event.item.ts) || voteKickedMessages.includes(event.item.file) || voteKickedMessages.includes(event.item.file_comment);
         if(kickReaction && kickReaction.count >= 3 && !hasBeenKickedForMessageAlready) {
             voteKickedMessages.push(event.item.ts || event.item.file || event.item.file_comment);
@@ -330,7 +329,7 @@ slackEvents.on('reaction_added', (event) => {
                     .then(userOffenses => {
                         const offenseNumber = userOffenses.length + 1;
                         let offenseTime = getOffenseTime(offenseNumber);
-                        let usersVoteList = `<@${kickReaction.users[0]}>, @<${kickReaction.users[1]}>, and <@${kickReaction.users[2]}>`;
+                        let usersVoteList = `<@${kickReaction.users[0]}>, <@${kickReaction.users[1]}>, and <@${kickReaction.users[2]}>`;
                         web.chat.postMessage({ channel: channelId, text: `${usersVoteList} have spoken. ${user.profile.display_name || user.real_name} has been removed from the chat. This is their ${helpers.ordinalOf(offenseNumber)} offense in the last 24 hours. They will be reinvited after ${offenseTime.words}.` })
                         .then(() => {
                             inviteUserAfterTime(channelId, userId, offenseTime.seconds);
