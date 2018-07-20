@@ -259,8 +259,8 @@ slackEvents.on('message', (event) => {
                     const tacoRecipientId = event.text.split('@').pop().split('>');
                     // Removes tacos and <@userid> from the message and the rest is the reason for the gift
                     const reasonForGifting = event.text.replace(':taco:', '').replace(/<.*>/, '');
-                    scoresService.updateTacoScore(tacoRecipientId, 0, numTacos);
-                    scoresService.updateTacoScore(event.user, numTacos, 0);
+                    scoresService.updateTacoScore(tacoRecipientId, 0, numNewTacos);
+                    scoresService.updateTacoScore(event.user, numNewTacos, 0);
                     tacoTransactionService.createTacoTransaction(tacoRecipientId, event.user, numNewTacos, reasonForGifting);
                     web.chat.postMessage({ channel: event.channel , text: `<@${event.user}> gave <@${tacoRecipientId}> ${numNewTacos} taco(s).` }).catch(console.error);
                 }
