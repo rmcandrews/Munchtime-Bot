@@ -125,7 +125,6 @@ handleScoreboard = (event) => {
         scoreboardData.forEach(userScores => {
             tableData.push([userScores.name, userScores.bans, userScores.bannedTime, userScores.totalTacosGiven, userScores.totalTacosReceived]);
         });
-        console.log(tableData);
         let responseString = "```" + table(tableData) + "```\n" + `Pretty web page: ${process.env.BASE_URL}/scoreboard`;
         web.chat.postMessage({ channel: event.channel, text: responseString}).catch(console.error)
     })
@@ -242,11 +241,12 @@ slackEvents.on('message', (event) => {
         //Handle if someone gives tacos. Need to make sure they also mention someone
         if(event.text && event.text.includes(":taco:") && event.text.includes(">")) {
             const numNewTacos = helpers.countStringOccurrences(event.text, ":taco:");
+            // Mentions are in the format of <@userId>. This will get us a userid.
+            const tacoRecipientId = event.text.split('@').pop().split('>').shift();
             tacoTransactionService.getNumberOfGiftedTacoTransactionsByUserInLastDay(event.user)
             .then((tacoTransactions) => {
                 let giftedTacos = 0;
                 tacoTransactions.forEach((tacoTransaction) => {
-                    console.log(tacoTransaction);
                     giftedTacos += tacoTransaction.number;
                 });
                 if(event.text.split('>').length > 2) {
@@ -256,11 +256,11 @@ slackEvents.on('message', (event) => {
                 } else if(giftedTacos+numNewTacos > 10) {
                     // Don't allow to gift these tacos. Tell them NO! BAD DOG! and the num of tacos they can still give today.
                     web.chat.postMessage({ channel: event.channel , text: `<@${event.user}> you can only give 10 tacos in a day. You have ${10-giftedTacos} left to give today.` }).catch(console.error);
+                } else if(tacoRecipientId === event.user) {
+                    web.chat.postMessage({ channel: event.channel , text: `<@${event.user}> NO SOUP FOR YOU! NO GIVING YOURSELF TACOS!` }).catch(console.error);
                 } else {
-                    // Mentions are in the format of <@userId> (I think). This will get us a userid.
-                    const tacoRecipientId = event.text.split('@').pop().split('>').shift();
                     // Removes tacos and <@userid> from the message and the rest is the reason for the gift
-                    const reasonForGifting = event.text.replace(/:taco:/g, '').replace(/<.*>/, '');
+                    const reasonForGifting = event.text.replace(/:taco:/g, '').replace(/<.*>/, '').trim();
                     scoresService.updateTacoScore(tacoRecipientId, 0, numNewTacos);
                     scoresService.updateTacoScore(event.user, numNewTacos, 0);
                     tacoTransactionService.createTacoTransaction(tacoRecipientId, event.user, numNewTacos, reasonForGifting);
