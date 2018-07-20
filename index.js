@@ -125,6 +125,7 @@ handleScoreboard = (event) => {
         scoreboardData.forEach(userScores => {
             tableData.push([userScores.name, userScores.bans, userScores.bannedTime, userScores.totalTacosGiven, userScores.totalTacosReceived]);
         });
+        console.log(tableData);
         let responseString = "```" + table(tableData) + "```\n" + `Pretty web page: ${process.env.BASE_URL}/scoreboard`;
         web.chat.postMessage({ channel: event.channel, text: responseString}).catch(console.error)
     })
