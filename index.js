@@ -255,7 +255,7 @@ slackEvents.on('message', (event) => {
                     web.chat.postMessage({ channel: event.channel, text: "You can only give up to 10 tacos a day" }).catch(console.error);
                 } else if(giftedTacos+numNewTacos > 10) {
                     // Don't allow to gift these tacos. Tell them NO! BAD DOG! and the num of tacos they can still give today.
-                    web.chat.postMessage({ channel: event.channel , text: `<@${event.user}> you can only give 10 tacos in a day. You have ${10-giftedTacos.length} left to give today.` }).catch(console.error);
+                    web.chat.postMessage({ channel: event.channel , text: `<@${event.user}> you can only give 10 tacos in a day. You have ${10-giftedTacos} left to give today.` }).catch(console.error);
                 } else {
                     // Mentions are in the format of <@userId> (I think). This will get us a userid.
                     const tacoRecipientId = event.text.split('@').pop().split('>').shift();
