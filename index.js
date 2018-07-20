@@ -290,29 +290,52 @@ slackEvents.on('reaction_added', (event) => {
         if(kickReaction && kickReaction.count >= 1 && !hasBeenKickedForMessageAlready) {
             voteKickedMessages.push(event.item.ts || event.item.file || event.item.file_comment);
             let userId = reactedToItem.user;
-            console.log(userId);
-            web.groups.kick({
-                channel: channelId,
-                user: userId
-            }).then(() => {
-                web.users.info({
+            if(!userId) {
+                userId = event.user
+                web.groups.kick({
+                    channel: channelId,
                     user: userId
-                }).then(response => {
-                    console.log(response);
-                    let user = response.user;
-                    offenseService.getOffensesForUserInLast24Hours(userId)
-                    .then(userOffenses => {
-                        const offenseNumber = userOffenses.length + 1;
-                        let offenseTime = getOffenseTime(offenseNumber);
-                        web.chat.postMessage({ channel: channelId, text: `The people have spoken. ${user.profile.display_name || user.real_name} has been removed from the chat. This is their ${helpers.ordinalOf(offenseNumber)} offense in the last 24 hours. They will be reinvited after ${offenseTime.words}.` })
-                        .then(() => {
-                            inviteUserAfterTime(channelId, userId, offenseTime.seconds);
-                            offenseService.createOffense(userId, offenseTime.seconds);
-                            scoresService.updateBanScore(userId, offenseTime.seconds);
+                }).then(() => {
+                    web.users.info({
+                        user: userId
+                    }).then(response => {
+                        let user = response.user;
+                        offenseService.getOffensesForUserInLast24Hours(userId)
+                        .then(userOffenses => {
+                            const offenseNumber = userOffenses.length + 1;
+                            let offenseTime = getOffenseTime(offenseNumber);
+                            web.chat.postMessage({ channel: channelId, text: `${user.profile.display_name || user.real_name} voted to kick me, so I kicked them. This is their ${helpers.ordinalOf(offenseNumber)} offense in the last 24 hours. They will be reinvited after ${offenseTime.words}.` })
+                            .then(() => {
+                                inviteUserAfterTime(channelId, userId, offenseTime.seconds);
+                                offenseService.createOffense(userId, offenseTime.seconds);
+                                scoresService.updateBanScore(userId, offenseTime.seconds);
+                            }).catch(console.error);
                         }).catch(console.error);
                     }).catch(console.error);
                 }).catch(console.error);
-            }).catch(console.error);
+            } else {
+                web.groups.kick({
+                    channel: channelId,
+                    user: userId
+                }).then(() => {
+                    web.users.info({
+                        user: userId
+                    }).then(response => {
+                        let user = response.user;
+                        offenseService.getOffensesForUserInLast24Hours(userId)
+                        .then(userOffenses => {
+                            const offenseNumber = userOffenses.length + 1;
+                            let offenseTime = getOffenseTime(offenseNumber);
+                            web.chat.postMessage({ channel: channelId, text: `The people have spoken. ${user.profile.display_name || user.real_name} has been removed from the chat. This is their ${helpers.ordinalOf(offenseNumber)} offense in the last 24 hours. They will be reinvited after ${offenseTime.words}.` })
+                            .then(() => {
+                                inviteUserAfterTime(channelId, userId, offenseTime.seconds);
+                                offenseService.createOffense(userId, offenseTime.seconds);
+                                scoresService.updateBanScore(userId, offenseTime.seconds);
+                            }).catch(console.error);
+                        }).catch(console.error);
+                    }).catch(console.error);
+                }).catch(console.error);
+            }
         }
     }).catch(console.error);
 });
