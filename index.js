@@ -274,7 +274,7 @@ slackEvents.on('reaction_added', (event) => {
     console.log(event.item);
     let reactionGetOptions = {
       channel: channelId,
-      timestamp: event.item.timestamp,
+      timestamp: event.item.ts,
       file: event.item.file,
       file_comment: event.item.file_comment,
       full: true
