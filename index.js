@@ -268,7 +268,8 @@ slackEvents.on('member_joined_channel', (event) => {
 let voteKickedMessages = [];
 
 slackEvents.on('reaction_added', (event) => {
-    if (event.reaction !== "kick") {
+
+    if (event.reaction !== "kick" || event.channel === process.env.IGNORE_CHANNEL) {
         return;
     }
     
