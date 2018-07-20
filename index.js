@@ -170,7 +170,7 @@ doesMentionBot = (text) => {
 
 slackEvents.on('message', (event) => {
 
-    if(doesMentionBot(event.user)) return;
+    if(event.user === "UBP9JBB2B") return;
 
     if (event.channel != process.env.IGNORE_CHANNEL) {
         // Handle kicking people who say a banned phrase
