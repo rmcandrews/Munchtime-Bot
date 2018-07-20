@@ -273,7 +273,9 @@ http.createServer(app).listen(port, () => {
 });
 
 new CronJob('0 9 * * 1-5', () => {
-  if(Math.random() < 0.2) {
-    console.log('gm, happy to be @here');
+  if(Math.random() < 1) {
+    setTimeout(() => {
+        web.chat.postMessage({ channel: process.env.CHANNEL_ID, text: "gm, happy to be @here" })
+    }, Math.random() * 60 * 30 * 1000) ;
   }
 }, null, true, 'America/Chicago');
