@@ -280,8 +280,9 @@ slackEvents.on('reaction_added', (event) => {
     };
     
     web.reactions.get(reactionGetOptions).then(response => {
-        console.log(reactions);
+        console.log(response);
         let reactions = response[response.type].reactions;
+        console.log(reactions);
         let kickReaction = reactions.some((reaction) => { 
             return reaction.name === "kick";
         });
