@@ -34,6 +34,8 @@ module.exports = `
         <th>Name</th>
         <th>Bans</th>
         <th>Time</th>
+        <th>Tacos Given</th>
+        <th>Tacos Received</th>
     </tr>
     {{{tableData}}}</table>
 </body>
