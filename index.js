@@ -8,7 +8,8 @@ const tacoTransactionService = require('./services/tacoTransactionService');
 const table = require('table').table;
 const Handlebars = require('handlebars');
 const CronJob = require('cron').CronJob;
-const sentiment = new require('sentiment');
+var Sentiment = require('sentiment');
+var sentiment = new Sentiment();
 
 const app = express();
 app.use(bodyParser.json());
