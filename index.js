@@ -8,7 +8,7 @@ const tacoTransactionService = require('./services/tacoTransactionService');
 const table = require('table').table;
 const Handlebars = require('handlebars');
 const CronJob = require('cron').CronJob;
-const speak = require("speakeasy-nlp");
+const sentiment = new require('sentiment');
 
 const app = express();
 app.use(bodyParser.json());
@@ -75,7 +75,7 @@ getOffenseTime = (offenseNumber) => {
 didUseBannedWords = (text) => {
     return bannedSubstrings.some((bannedSubstring) => { 
         return text.toLowerCase().includes(bannedSubstring);
-    }) && (speak.sentiment.negativity(text).score > maxNegativityScore || speak.sentiment.positivity(text).score < minPositivityScore);
+    }) && (sentiment.analyze(text).comparative < 2);
 }
 
 inviteUserAfterTime = (channel, user, seconds) => {
