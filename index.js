@@ -354,7 +354,7 @@ slackEvents.on('reaction_added', (event) => {
         }
 
         let hasBeenKickedForMessageAlready = voteKickedMessages.includes(event.item.ts) || voteKickedMessages.includes(event.item.file) || voteKickedMessages.includes(event.item.file_comment);
-        if(kickReaction && kickReaction.count >= 3 && !hasBeenKickedForMessageAlready) {
+        if(kickReaction && kickReaction.count >= 4 && !hasBeenKickedForMessageAlready) {
             voteKickedMessages.push(event.item.ts || event.item.file || event.item.file_comment);
             web.groups.kick({
                 channel: channelId,
