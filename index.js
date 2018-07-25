@@ -76,7 +76,7 @@ getOffenseTime = (offenseNumber) => {
 didUseBannedWords = (text) => {
     return bannedSubstrings.some((bannedSubstring) => { 
         return text.toLowerCase().includes(bannedSubstring);
-    }) && (sentiment.analyze(text).comparative < 2);
+    }) && (sentiment.analyze(text).score < 6);
 }
 
 inviteUserAfterTime = (channel, user, seconds) => {
