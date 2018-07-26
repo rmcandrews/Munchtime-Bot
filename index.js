@@ -389,10 +389,10 @@ http.createServer(app).listen(port, () => {
     console.log(`server listening on port ${port}`);
 });
 
-new CronJob('0 9 * * 1-5', () => {
-  if(Math.random() < 1) {
-    setTimeout(() => {
-        web.chat.postMessage({ channel: process.env.CHANNEL_ID, text: "gm <@UAMN3836E>" })
-    }, Math.random() * 60 * 30 * 1000) ;
-  }
-}, null, true, 'America/Chicago');
+// new CronJob('0 9 * * 1-5', () => {
+//   if(Math.random() < 1) {
+//     setTimeout(() => {
+//         web.chat.postMessage({ channel: process.env.CHANNEL_ID, text: "gm <@UAMN3836E>" })
+//     }, Math.random() * 60 * 30 * 1000) ;
+//   }
+// }, null, true, 'America/Chicago');
