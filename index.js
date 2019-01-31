@@ -235,7 +235,7 @@ slackEvents.on('message', (event) => {
         }
 
         // Handle if someone says apparently
-        if(event.text && didUseSubstrings(apparentlySubstrings, event.text.toLowerCase()) {
+        if(event.text && didUseSubstrings(apparentlySubstrings, event.text) {
             let gifLinks = [ 
                 "https://media.giphy.com/media/KnXfc2AMnl6Wk/giphy.gif",
                 "https://media1.tenor.com/images/127808ecc3bd3f1f8a1ca6e93de32b11/tenor.gif?itemid=10867888",
