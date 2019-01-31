@@ -48,8 +48,7 @@ const minPositivityScore = 1; // min positive sentiment score tolerated (higher 
 const maxNegativityScore = 0; // max negative sentiment score tolerated (higher num == more tolerant)
 // TODO Move trigger words to seperate file/database
 const bannedSubstrings = ["ur mom", "u r mom", "ur mum", "u r mum", "ur mother", "u r mother", "your mom", "your mum", "your mother", "you're mom", "you're mum", "you're mother", "youre mom", "youre mum", "youre mother"];
-const apparentlySubstrings = ["apparently", "appurntly", "appurently", "apurently", "aparently"];
-
+ 
 let userWhoKickedMe;
 
 getOffenseTime = (offenseNumber) => {
@@ -75,13 +74,9 @@ getOffenseTime = (offenseNumber) => {
 }
 
 didUseBannedWords = (text) => {
-    return didUseSubstrings(bannedSubstrings, text) && (sentiment.analyze(text).score < 6);
-}
-
-didUseSubstrings = (subs, text) => {
-    return subs.some((x) => { 
-        return text.toLowerCase().includes(x);
-    });
+    return bannedSubstrings.some((bannedSubstring) => { 
+        return text.toLowerCase().includes(bannedSubstring);
+    }) && (sentiment.analyze(text).score < 6);
 }
 
 inviteUserAfterTime = (channel, user, seconds) => {
@@ -235,7 +230,7 @@ slackEvents.on('message', (event) => {
         }
 
         // Handle if someone says apparently
-        if(event.text && didUseSubstrings(apparentlySubstrings, event.text) {
+        if(event.text && event.text.toLowerCase().includes("apparently")) {
             let gifLinks = [ 
                 "https://media.giphy.com/media/KnXfc2AMnl6Wk/giphy.gif",
                 "https://media1.tenor.com/images/127808ecc3bd3f1f8a1ca6e93de32b11/tenor.gif?itemid=10867888",
