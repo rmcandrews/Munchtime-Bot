@@ -179,6 +179,10 @@ handleScoreboard = event => {
     .catch(console.error);
 };
 
+handleHunter = event => {
+
+}
+
 getScoreboardData = () => {
   return new Promise((resolve, reject) => {
     Promise.all([web.users.list(), scoresService.getAllScores()])
@@ -322,6 +326,19 @@ slackEvents.on("message", event => {
         .postMessage({ channel: event.channel, text: "drink" })
         .catch(console.error);
     }
+
+    if (event.text && event.text.toLowerCase().includes("hunter2")) {
+        var searchMask = "hunter2";
+        var regEx = new RegExp(searchMask, "ig");
+        var replaceMask = "*******";
+
+        var result = event.text.replace(regEx, replaceMask);
+        web.chat.update({
+          channel: event.channel,
+          text: result,
+          ts: event.ts
+        }).catch(console.error);
+      }
 
     // Handle if someone says apparently
     if (event.text && event.text.toLowerCase().includes("apparently")) {
