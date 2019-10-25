@@ -329,11 +329,13 @@ slackEvents.on("message", event => {
       var replaceMask = "*******";
 
       var result = event.text.replace(regEx, replaceMask);
-      web.chat.update({
-        channel: event.channel,
-        text: result,
-        ts: event.ts
-      }).catch(console.error);
+      web.chat
+        .delete({
+          channel: event.channel,
+          text: result,
+          ts: event.ts
+        })
+        .catch(console.error);
     }
 
     // Handle if someone says apparently
@@ -406,9 +408,7 @@ slackEvents.on("message", event => {
             web.chat
               .postMessage({
                 channel: event.channel,
-                text: `<@${
-                  event.user
-                }> NO SOUP FOR YOU! NO GIVING YOURSELF TACOS!`
+                text: `<@${event.user}> NO SOUP FOR YOU! NO GIVING YOURSELF TACOS!`
               })
               .catch(console.error);
           } else {
@@ -428,9 +428,7 @@ slackEvents.on("message", event => {
             web.chat
               .postMessage({
                 channel: event.channel,
-                text: `<@${
-                  event.user
-                }> gave <@${tacoRecipientId}> ${numNewTacos} taco(s).`
+                text: `<@${event.user}> gave <@${tacoRecipientId}> ${numNewTacos} taco(s).`
               })
               .catch(console.error);
           }
