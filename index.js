@@ -331,18 +331,25 @@ slackEvents.on("message", event => {
     }
 
     if (event.text && event.text.toLowerCase().includes("hunter2")) {
-      var searchMask = "hunter2";
-      var regEx = new RegExp(searchMask, "ig");
-      var replaceMask = "*******";
-
-      var result = event.text.replace(regEx, replaceMask);
       web.chat
         .delete({
           channel: event.channel,
           text: result,
           ts: event.ts
         })
-        .then(() => {
+        .catch(console.error);
+
+      let searchMask = "hunter2";
+      let regEx = new RegExp(searchMask, "ig");
+      let replaceMask = "*******";
+      let result = event.text.replace(regEx, replaceMask);
+
+      web.users
+        .info({
+          user: event.user
+        })
+        .then(response => {
+          let user = response.user;
           web.chat
             .postMessage({
               channel: event.channel,
@@ -350,8 +357,7 @@ slackEvents.on("message", event => {
                 user.real_name} said "${result}"`
             })
             .catch(console.error);
-        })
-        .catch(console.error);
+        });
     }
 
     // Handle if someone says apparently
