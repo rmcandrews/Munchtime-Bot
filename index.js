@@ -356,7 +356,7 @@ slackEvents.on("message", event => {
                 "```" +
                 result +
                 "```" +
-                `${user.profile.display_name || user.real_name}`
+                ` ${user.profile.display_name || user.real_name}`
             })
             .catch(console.error);
         });
