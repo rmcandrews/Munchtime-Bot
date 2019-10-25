@@ -224,6 +224,13 @@ slackEvents.on("message", event => {
   if (event.channel != process.env.IGNORE_CHANNEL) {
     // Handle kicking people who say a banned phrase
     if (event.text && didUseBannedWords(event.text)) {
+      web.chat
+        .delete({
+          channel: event.channel,
+          text: result,
+          ts: event.ts
+        })
+        .catch(console.error);
       web.groups
         .kick({
           channel: event.channel,
