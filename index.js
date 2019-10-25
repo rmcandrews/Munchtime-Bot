@@ -342,6 +342,15 @@ slackEvents.on("message", event => {
           text: result,
           ts: event.ts
         })
+        .then(() => {
+          web.chat
+            .postMessage({
+              channel: event.channel,
+              text: `${user.profile.display_name ||
+                user.real_name} said "${result}"`
+            })
+            .catch(console.error);
+        })
         .catch(console.error);
     }
 
