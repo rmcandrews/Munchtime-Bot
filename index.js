@@ -355,7 +355,7 @@ slackEvents.on("message", event => {
               channel: event.channel,
               text:
                 `${user.profile.display_name || user.real_name}` +
-                "said" +
+                " said " +
                 "```" +
                 result +
                 "```"
