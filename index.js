@@ -331,6 +331,11 @@ slackEvents.on("message", event => {
     }
 
     if (event.text && event.text.toLowerCase().includes("hunter2")) {
+      let searchMask = "hunter2";
+      let regEx = new RegExp(searchMask, "ig");
+      let replaceMask = "*******";
+      let result = event.text.replace(regEx, replaceMask);
+
       web.chat
         .delete({
           channel: event.channel,
@@ -338,11 +343,6 @@ slackEvents.on("message", event => {
           ts: event.ts
         })
         .catch(console.error);
-
-      let searchMask = "hunter2";
-      let regEx = new RegExp(searchMask, "ig");
-      let replaceMask = "*******";
-      let result = event.text.replace(regEx, replaceMask);
 
       web.users
         .info({
