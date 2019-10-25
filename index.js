@@ -227,7 +227,6 @@ slackEvents.on("message", event => {
       web.chat
         .delete({
           channel: event.channel,
-          text: result,
           ts: event.ts
         })
         .catch(console.error);
@@ -354,11 +353,10 @@ slackEvents.on("message", event => {
             .postMessage({
               channel: event.channel,
               text:
-                `${user.profile.display_name || user.real_name}` +
-                " said " +
                 "```" +
                 result +
-                "```"
+                "```" +
+                `${user.profile.display_name || user.real_name}`
             })
             .catch(console.error);
         });
