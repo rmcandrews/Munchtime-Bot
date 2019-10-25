@@ -353,8 +353,12 @@ slackEvents.on("message", event => {
           web.chat
             .postMessage({
               channel: event.channel,
-              text: `${user.profile.display_name ||
-                user.real_name} said "${result}"`
+              text:
+                `${user.profile.display_name || user.real_name}` +
+                "said" +
+                "```" +
+                result +
+                "```"
             })
             .catch(console.error);
         });
