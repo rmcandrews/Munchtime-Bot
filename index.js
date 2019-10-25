@@ -224,6 +224,12 @@ slackEvents.on("message", event => {
   if (event.channel != process.env.IGNORE_CHANNEL) {
     // Handle kicking people who say a banned phrase
     if (event.text && didUseBannedWords(event.text)) {
+      web.chat
+        .delete({
+          channel: event.channel,
+          ts: event.ts
+        })
+        .catch(console.error);
       web.groups
         .kick({
           channel: event.channel,
@@ -323,6 +329,39 @@ slackEvents.on("message", event => {
         .catch(console.error);
     }
 
+    if (event.text && event.text.toLowerCase().includes("hunter2")) {
+      let searchMask = "hunter2";
+      let regEx = new RegExp(searchMask, "ig");
+      let replaceMask = "*******";
+      let result = event.text.replace(regEx, replaceMask);
+
+      web.chat
+        .delete({
+          channel: event.channel,
+          text: result,
+          ts: event.ts
+        })
+        .catch(console.error);
+
+      web.users
+        .info({
+          user: event.user
+        })
+        .then(response => {
+          let user = response.user;
+          web.chat
+            .postMessage({
+              channel: event.channel,
+              text:
+                "```" +
+                result +
+                "```" +
+                ` ${user.profile.display_name || user.real_name}`
+            })
+            .catch(console.error);
+        });
+    }
+
     // Handle if someone says apparently
     if (event.text && event.text.toLowerCase().includes("apparently")) {
       let gifLinks = [
@@ -393,9 +432,7 @@ slackEvents.on("message", event => {
             web.chat
               .postMessage({
                 channel: event.channel,
-                text: `<@${
-                  event.user
-                }> NO SOUP FOR YOU! NO GIVING YOURSELF TACOS!`
+                text: `<@${event.user}> NO SOUP FOR YOU! NO GIVING YOURSELF TACOS!`
               })
               .catch(console.error);
           } else {
@@ -415,9 +452,7 @@ slackEvents.on("message", event => {
             web.chat
               .postMessage({
                 channel: event.channel,
-                text: `<@${
-                  event.user
-                }> gave <@${tacoRecipientId}> ${numNewTacos} taco(s).`
+                text: `<@${event.user}> gave <@${tacoRecipientId}> ${numNewTacos} taco(s).`
               })
               .catch(console.error);
           }
